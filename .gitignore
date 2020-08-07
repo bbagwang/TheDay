@@ -1,3 +1,6 @@
+# SVN Ignore
+.svn/
+
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -69,6 +72,17 @@ Saved/*
 # Compiled source files for the engine to use
 Intermediate/*
 Plugins/*/Intermediate/*
+Plugins/*/Binaries/*
+Plugins/*/*.uplugin
+Plugins/*/Content/*
+Plugins/*/Resources/*
+Plugins/*/.DS_Store
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Content Ignore
+Content/*
+
+# Config Ignore
+Config/*
