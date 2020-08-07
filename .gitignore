@@ -1,3 +1,6 @@
+# BuildScript Ignore
+BuildScripts/*
+
 # SVN Ignore
 .svn/
 
