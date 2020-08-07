@@ -7,3 +7,10 @@
 ATheDayGameMode::ATheDayGameMode()
 {
 }
+
+void ATheDayGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	UE_LOG(LogTemp, Warning, TEXT("Init Game!"));
+}

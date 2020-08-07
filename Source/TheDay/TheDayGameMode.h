@@ -13,4 +13,7 @@ class ATheDayGameMode : public AGameModeBase
 
 public:
 	ATheDayGameMode();
+
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
 };
