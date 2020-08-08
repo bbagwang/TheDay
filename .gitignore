@@ -25,6 +25,9 @@ BuildScripts/*
 # Fortran module files
 *.mod
 
+# Debug Libraries
+*.pdb
+
 # Compiled Static libraries
 *.lai
 *.la
@@ -89,3 +92,12 @@ Content/*
 
 # Config Ignore
 Config/*
+
+# Wwise Ignore
+*.wproj
+*.wsettings
+*.wsettings
+*.validationcache
+*.wwu
+Plugins/Wwise/*.json
+/Wwise/.cache
