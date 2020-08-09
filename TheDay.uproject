@@ -7,7 +7,11 @@
 		{
 			"Name": "TheDay",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"CinematicCamera",
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [

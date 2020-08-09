@@ -15,6 +15,6 @@ public class TheDay : ModuleRules
         { "Core", "CoreUObject", "Engine", "InputCore",
         "GameplayAbilities","GameplayTags","GameplayTasks",
         "NavigationSystem","AIModule","Slate", "SlateCore",
-        "UMG"});
+        "UMG", "AkAudio" });
     }
 }
