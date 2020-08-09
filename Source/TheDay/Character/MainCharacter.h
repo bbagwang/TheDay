@@ -13,4 +13,10 @@ class THEDAY_API AMainCharacter : public ABaseCharacter
 	
 public:
 	AMainCharacter();
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

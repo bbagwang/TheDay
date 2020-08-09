@@ -8,6 +8,10 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Component/StatusComponent.h"
+#include "Component/InventoryComponent.h"
+#include "Component/WeaponManagerComponent.h"
+
 ABaseCharacter::ABaseCharacter()
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -24,14 +28,22 @@ ABaseCharacter::ABaseCharacter()
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("Status Component"));
+	ensure(StatusComponent);
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
+	ensure(InventoryComponent);
+	WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(TEXT("Weapon Manager Component"));
+	ensure(WeaponManagerComponent);
+}
 
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+void ABaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void ABaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -39,6 +51,8 @@ void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABaseCharacter::StartAiming);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABaseCharacter::EndAiming);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
@@ -73,12 +87,30 @@ void ABaseCharacter::MoveForward(float Value)
 
 void ABaseCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ABaseCharacter::StartAiming()
+{
+	if (!StatusComponent)
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Start Aiming!"));
+	StatusComponent->SetAiming(true);
+}
+
+void ABaseCharacter::EndAiming()
+{
+	if (!StatusComponent)
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("End Aiming!"));
+	StatusComponent->SetAiming(false);
 }
