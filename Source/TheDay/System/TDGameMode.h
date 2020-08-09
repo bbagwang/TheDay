@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "TheDayGameMode.generated.h"
+#include "TDGameMode.generated.h"
 
 UCLASS(minimalapi)
-class ATheDayGameMode : public AGameModeBase
+class ATDGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
-	ATheDayGameMode();
+	ATDGameMode();
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 

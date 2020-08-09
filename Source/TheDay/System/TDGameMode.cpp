@@ -1,14 +1,15 @@
 // Copyright BBAGWANG SOFT, Inc. All Rights Reserved.
 
-#include "TheDayGameMode.h"
-#include "TheDayCharacter.h"
+#include "TDGameMode.h"
+#include "Character/BaseCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
-ATheDayGameMode::ATheDayGameMode()
+ATDGameMode::ATDGameMode()
 {
+
 }
 
-void ATheDayGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+void ATDGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
