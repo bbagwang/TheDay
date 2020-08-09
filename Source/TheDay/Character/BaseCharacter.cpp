@@ -1,6 +1,6 @@
 // Copyright BBAGWANG SOFT, Inc. All Rights Reserved.
 
-#include "TheDayCharacter.h"
+#include "BaseCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -8,7 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
-ATheDayCharacter::ATheDayCharacter()
+ABaseCharacter::ABaseCharacter()
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -34,32 +34,32 @@ ATheDayCharacter::ATheDayCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 }
 
-void ATheDayCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ATheDayCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ATheDayCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ATheDayCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("TurnRate", this, &ABaseCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ATheDayCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &ABaseCharacter::LookUpAtRate);
 }
 
-void ATheDayCharacter::TurnAtRate(float Rate)
+void ABaseCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ATheDayCharacter::LookUpAtRate(float Rate)
+void ABaseCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void ATheDayCharacter::MoveForward(float Value)
+void ABaseCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
@@ -71,7 +71,7 @@ void ATheDayCharacter::MoveForward(float Value)
 	}
 }
 
-void ATheDayCharacter::MoveRight(float Value)
+void ABaseCharacter::MoveRight(float Value)
 {
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{

@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "TheDayCharacter.generated.h"
+#include "BaseCharacter.generated.h"
 
 UCLASS(config=Game)
-class ATheDayCharacter : public ACharacter
+class ABaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -17,7 +17,7 @@ class ATheDayCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 
 public:
-	ATheDayCharacter();
+	ABaseCharacter();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
