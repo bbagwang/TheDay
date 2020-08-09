@@ -56,7 +56,6 @@ SourceArt/**/*.tga
 
 # Binary Files
 Binaries/*
-Plugins/*/Binaries/*
 
 # Builds
 Build/*
@@ -77,12 +76,12 @@ Saved/*
 
 # Compiled source files for the engine to use
 Intermediate/*
-Plugins/*/Intermediate/*
-Plugins/*/Binaries/*
-Plugins/*/*.uplugin
-Plugins/*/Content/*
-Plugins/*/Resources/*
-Plugins/*/.DS_Store
+Plugins/**/Intermediate/*
+Plugins/**/Binaries/*
+Plugins/**/*.uplugin
+Plugins/**/Content/*
+Plugins/**/Resources/*
+Plugins/**/.DS_Store
 
 # Cache files for the editor to use
 DerivedDataCache/*
@@ -100,4 +99,7 @@ Config/*
 *.validationcache
 *.wwu
 Plugins/Wwise/*.json
-/Wwise/.cache
+Wwise/.cache
+
+# Temp Ignore
+enc_temp_folder/*
