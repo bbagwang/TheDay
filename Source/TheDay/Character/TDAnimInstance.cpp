@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Component/StatusComponent.h"
+#include "Component/WeaponManagerComponent.h"
 
 UTDAnimInstance::UTDAnimInstance()
 {
@@ -25,14 +26,22 @@ void UTDAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!OwnerCharacter) return;
 	
 	Velocity = OwnerCharacter->GetVelocity();
-	Rotation = OwnerCharacter->GetActorRotation();
 	Speed = UKismetMathLibrary::VSize(Velocity);
+	Rotation = OwnerCharacter->GetActorRotation();
 	Direction = CalculateDirection(Velocity, Rotation);
 	bIsMoving = (Speed >= 0.f) ? true : false;
 	bIsJumping = OwnerCharacter->GetCharacterMovement()->IsFalling();
+	bIsCrouching = OwnerCharacter->bIsCrouched;
+
 	if (OwnerCharacter->GetStatusComponent())
 	{
 		bIsAiming = OwnerCharacter->GetStatusComponent()->IsAiming();
-		bIsAttacking = OwnerCharacter->GetStatusComponent()->IsAttacking();
+		
+	}
+	
+	if (OwnerCharacter->GetWeaponManagerComponent())
+	{
+		bIsAttacking = OwnerCharacter->GetWeaponManagerComponent()->IsAttacking();
+		
 	}
 }

@@ -39,5 +39,10 @@ public:
 	float Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Montage_Aim;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Montage_Attack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ABaseCharacter* OwnerCharacter;
 };
