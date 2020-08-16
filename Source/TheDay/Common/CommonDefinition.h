@@ -3,5 +3,3 @@
 #pragma once
 
 #define WeaponTraceChannel ECC_GameTraceChannel1
-
-#include "CoreMinimal.h"
