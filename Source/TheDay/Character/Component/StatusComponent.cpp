@@ -1,6 +1,8 @@
 // Copyright BBAGWANG SOFT, Inc. All Rights Reserved.
 
 #include "StatusComponent.h"
+#include "Character/BaseCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UStatusComponent::UStatusComponent()
 {
@@ -12,10 +14,24 @@ void UStatusComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OwnerCharacter = Cast<ABaseCharacter>(GetOwner());
 }
 
 void UStatusComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+}
+
+void UStatusComponent::SetAiming(bool bNewAiming)
+{
+	bIsAiming = bNewAiming;
+
+	OwnerCharacter->bUseControllerRotationYaw = bNewAiming;
+	OwnerCharacter->GetCharacterMovement()->bOrientRotationToMovement = !bNewAiming;
+}
+
+bool UStatusComponent::CanAiming()
+{
+	return bCanAiming;
 }

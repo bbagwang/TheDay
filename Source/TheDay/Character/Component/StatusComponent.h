@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "StatusComponent.generated.h"
 
+class ABaseCharacter;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class THEDAY_API UStatusComponent : public UActorComponent
 {
@@ -16,6 +18,11 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+#pragma region Character
+	UPROPERTY()
+	ABaseCharacter* OwnerCharacter;
+#pragma endregion
 
 #pragma region Health
 public:
@@ -33,20 +40,12 @@ protected:
 
 #pragma region Attack
 public:
-	FORCEINLINE bool IsAttacking() const { return bAttacking; }
-	FORCEINLINE void SetAttacking(bool bNewAttacking) { bAttacking = bNewAttacking; }
-	FORCEINLINE bool CanAttack() const { return bCanAttack; }
-	FORCEINLINE void SetCanAttack(bool bNewCanAttack) { bCanAttack = bNewCanAttack; }
 	FORCEINLINE bool CanBeDamaged() const { return bCanBeDamaged; }
 	FORCEINLINE void SetCanBeDamaged(bool bNewCanBeDamaged) { bCanBeDamaged = bNewCanBeDamaged; }
-	FORCEINLINE bool CanDoDamage() const { return bCanAttack; }
+	FORCEINLINE bool CanDoDamage() const { return bCanDoDamage; }
 	FORCEINLINE void SetCanDoDamage(bool bNewCanDoDamage) { bCanDoDamage = bNewCanDoDamage; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAttacking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanBeDamaged;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -55,11 +54,11 @@ protected:
 
 #pragma region Aim
 public:
-	FORCEINLINE bool IsAiming() const { return bIsAiming; }
-	FORCEINLINE void SetAiming(bool bNewAiming) { bIsAiming = bNewAiming; }
-	FORCEINLINE bool CanAiming() const { return bCanAiming; }
-	FORCEINLINE void SetCanAiming(bool bNewCanAiming) { bCanAiming = bNewCanAiming; }
+	void SetAiming(bool bNewAiming);
+	bool CanAiming();
 
+	FORCEINLINE bool IsAiming() const { return bIsAiming; }
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsAiming;
