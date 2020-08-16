@@ -2,6 +2,7 @@
 
 #include "Weapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Character/BaseCharacter.h"
 
 AWeapon::AWeapon()
 {
@@ -13,7 +14,7 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void AWeapon::Tick(float DeltaTime)
