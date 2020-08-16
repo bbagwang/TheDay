@@ -4,18 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Common/CommonEnum.h"
 #include "InventoryComponent.generated.h"
-
-UENUM(BlueprintType)
-enum class EWeaponSlot : uint8
-{
-	NONE,
-	PISTOL,
-	RIFLE
-};
 
 class AItem;
 class AWeapon;
+class ABaseCharacter;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THEDAY_API UInventoryComponent : public UActorComponent
@@ -30,6 +24,9 @@ public:
 
 #pragma region ItemInventory
 public:
+	//새로운 무기를 추가한다.
+	UFUNCTION(BlueprintCallable)
+	void AddItem(AItem* NewItem);
 	//ItemName 으로 아이템 인벤토리에서 아이템을 찾는다.
 	UFUNCTION(BlueprintCallable)
 	AItem* GetItemByName(const FName InItemName);
@@ -47,6 +44,18 @@ protected:
 
 #pragma region WeaponInventory
 public:
+	//새로운 무기를 추가한다.
+	UFUNCTION(BlueprintCallable)
+	void AddWeapon(AWeapon* NewWeapon,bool bEquip);
+	//무기를 장착한다.
+	UFUNCTION(BlueprintCallable)
+	void EquipWeapon(EWeaponSlot EquipSlot, bool bInstant = false);
+	//무기를 장착 해제한다.
+	UFUNCTION(BlueprintCallable)
+	void UnEquipWeapon(bool bInstant);
+	UFUNCTION(BlueprintCallable)
+	void DropWeapon(EWeaponSlot DropSlot);
+
 	//WeaponName 으로 무기 인벤토리에서 무기를 찾는다.
 	UFUNCTION(BlueprintCallable)
 	AWeapon* GetWeaponByName(const FName InWeaponName);
@@ -66,7 +75,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveWeaponBySlot(const EWeaponSlot InSlot);
 
+	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+protected:
+	EWeaponSlot GetWeaponSlotByWeaponType(const EWeaponType InWeaponType);
+	void UpdateWeaponOwnership(AWeapon* InWeapon);
+	void UpdateWeaponEquipStatus(AWeapon* InWeapon,bool bEquip);
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EWeaponSlot, AWeapon*> WeaponInventory;
+	UPROPERTY(BlueprintReadWrite)
+	AWeapon* EquippedWeapon;
+	UPROPERTY()
+	ABaseCharacter* OwnerCharacter;
 };
