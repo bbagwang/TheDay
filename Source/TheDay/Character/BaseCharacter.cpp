@@ -11,6 +11,7 @@
 #include "Component/StatusComponent.h"
 #include "Component/InventoryComponent.h"
 #include "Component/WeaponManagerComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -53,6 +54,10 @@ void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABaseCharacter::StartAiming);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABaseCharacter::EndAiming);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABaseCharacter::StartCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ABaseCharacter::EndCrouch);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ABaseCharacter::StartAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ABaseCharacter::EndAttack);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
@@ -114,3 +119,33 @@ void ABaseCharacter::EndAiming()
 	UE_LOG(LogTemp, Warning, TEXT("End Aiming!"));
 	StatusComponent->SetAiming(false);
 }
+#pragma endregion
+
+#pragma region Crouch
+void ABaseCharacter::StartCrouch()
+{
+	GetCharacterMovement()->Crouch();
+}
+
+void ABaseCharacter::EndCrouch()
+{
+	GetCharacterMovement()->UnCrouch();
+}
+#pragma endregion
+
+#pragma region Attack
+void ABaseCharacter::StartAttack()
+{
+	if (!WeaponManagerComponent)
+		return;
+
+	WeaponManagerComponent->Attack();
+}
+
+void ABaseCharacter::EndAttack()
+{
+	if (!WeaponManagerComponent)
+		return;
+}
+
+#pragma endregion

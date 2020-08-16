@@ -47,7 +47,20 @@ protected:
 	float BaseLookUpRate;
 
 #pragma region Aim
+protected:
 	void StartAiming();
 	void EndAiming();
+#pragma endregion
+
+#pragma region Crouch
+protected:
+	void StartCrouch();
+	void EndCrouch();
+#pragma endregion
+
+#pragma region Attack
+protected:
+	void StartAttack();
+	void EndAttack();
 #pragma endregion
 };
