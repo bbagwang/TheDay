@@ -5,6 +5,8 @@
 #include "Common/CommonDefinition.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Character/BaseCharacter.h"
+#include "Character/Component/WeaponManagerComponent.h"
 
 AGunWeapon::AGunWeapon()
 {
@@ -69,9 +71,14 @@ FVector AGunWeapon::CalculateFireStartLocation() const
 
 FVector AGunWeapon::CalculateFireEndLocation() const
 {
-	FTransform MuzzleTransform = GetMuzzleTransform();
+	FVector AimLocation;
+	if (OwnerCharacter)
+		AimLocation = OwnerCharacter->GetWeaponManagerComponent()->GetAimPoint();
+	/*FTransform MuzzleTransform = GetMuzzleTransform();
 	FVector SpreadNormal = UKismetMathLibrary::RandomUnitVectorInEllipticalConeInDegrees(MuzzleTransform.GetRotation().GetForwardVector(), FireSpreadY, FireSpreadX);
-	return SpreadNormal * FireRange;
+	return SpreadNormal * FireRange;*/
+
+	return AimLocation;
 }
 
 FTransform AGunWeapon::GetMuzzleTransform() const
