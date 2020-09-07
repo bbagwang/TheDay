@@ -28,9 +28,10 @@ protected:
 	FName WeaponName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText LocalizedName;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EWeaponType WeaponType;
+	EWeaponSlot WeaponSlot;
 
 	UPROPERTY()
 	ABaseCharacter* OwnerCharacter;
@@ -39,7 +40,7 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() { return WeaponMesh; }
 	FORCEINLINE FName GetWeaponName() const { return WeaponName; }
 	FORCEINLINE FText GetLocalizedName() const { return LocalizedName; }
-	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE EWeaponSlot GetWeaponSlot() const { return WeaponSlot; }
 	FORCEINLINE void SetOwnerCharacter(ABaseCharacter* NewOwnerCharacter) { OwnerCharacter = NewOwnerCharacter; }
 
 #pragma region Weapon

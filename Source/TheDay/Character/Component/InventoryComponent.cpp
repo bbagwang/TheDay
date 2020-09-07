@@ -71,8 +71,7 @@ void UInventoryComponent::AddWeapon(AWeapon* NewWeapon, bool bEquip)
 		return;
 	}
 
-	EWeaponType NewWeaponType = NewWeapon->GetWeaponType();
-	EWeaponSlot NewWeaponSlot = GetWeaponSlotByWeaponType(NewWeaponType);
+	EWeaponSlot NewWeaponSlot = NewWeapon->GetWeaponSlot();
 
 	if (WeaponInventory.Find(NewWeaponSlot))
 	{
@@ -171,32 +170,6 @@ void UInventoryComponent::RemoveWeaponBySlot(const EWeaponSlot InSlot)
 {
 	//TODO : 현재 무기 체크
 	WeaponInventory.Remove(InSlot);
-}
-
-EWeaponSlot UInventoryComponent::GetWeaponSlotByWeaponType(const EWeaponType InWeaponType)
-{
-	switch (InWeaponType)
-	{
-	case EWeaponType::PISTOL:
-		return EWeaponSlot::SMALL;
-		break;
-	case EWeaponType::RIFLE:
-	case EWeaponType::SNIPER:
-	case EWeaponType::SHOTGUN:
-		return EWeaponSlot::MEDIUM;
-		break;
-	case EWeaponType::ONE_HAND_MELEE:
-		return EWeaponSlot::MELEE;
-		break;
-	case EWeaponType::TWO_HANDS_MELEE:
-		return EWeaponSlot::MELEE;
-		break;
-
-	case EWeaponType::NONE:
-	default:
-		return EWeaponSlot::NONE;
-		break;
-	}
 }
 
 void UInventoryComponent::UpdateWeaponOwnership(AWeapon* InWeapon)

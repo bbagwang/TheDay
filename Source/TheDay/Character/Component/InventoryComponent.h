@@ -77,7 +77,6 @@ public:
 
 	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
 protected:
-	EWeaponSlot GetWeaponSlotByWeaponType(const EWeaponType InWeaponType);
 	void UpdateWeaponOwnership(AWeapon* InWeapon);
 	void UpdateWeaponEquipStatus(AWeapon* InWeapon,bool bEquip);
 protected:
