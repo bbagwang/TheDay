@@ -19,14 +19,27 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	class USpringArmComponent* SpringArmComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
+	class UCameraComponent* CameraComponent;
 
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class USpringArmComponent* GetCameraSpringArmComponent() const { return SpringArmComponent; }
+	FORCEINLINE class UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+
+#pragma region Aim
+	virtual void StartAiming() override;
+	virtual void EndAiming() override;
+#pragma endregion
+
+#pragma region FOV
+protected:
+	void UpdateAimFOV(float DeltaTime);
+
+protected:
+	float DefaultFOV;
+#pragma endregion
 };

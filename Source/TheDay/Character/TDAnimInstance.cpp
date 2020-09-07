@@ -29,19 +29,14 @@ void UTDAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Speed = UKismetMathLibrary::VSize(Velocity);
 	Rotation = OwnerCharacter->GetActorRotation();
 	Direction = CalculateDirection(Velocity, Rotation);
-	bIsMoving = (Speed >= 0.f) ? true : false;
-	bIsJumping = OwnerCharacter->GetCharacterMovement()->IsFalling();
-	bIsCrouching = OwnerCharacter->bIsCrouched;
 
-	if (OwnerCharacter->GetStatusComponent())
-	{
-		bIsAiming = OwnerCharacter->GetStatusComponent()->IsAiming();
-		
-	}
-	
+	bIsMoving = (Speed >= 0.f) ? true : false;
+	bIsJumping = OwnerCharacter->GetTDCharacterMovement()->IsFalling();
+	bIsCrouching = OwnerCharacter->GetTDCharacterMovement()->IsCrouching();
+
 	if (OwnerCharacter->GetWeaponManagerComponent())
 	{
 		bIsAttacking = OwnerCharacter->GetWeaponManagerComponent()->IsAttacking();
-		
+		bIsAiming = OwnerCharacter->GetWeaponManagerComponent()->IsAiming();
 	}
 }

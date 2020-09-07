@@ -8,11 +8,16 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Common/CommonDefinition.h"
 #include "DrawDebugHelpers.h"
+#include "../PlayerCharacter.h"
 
 UWeaponManagerComponent::UWeaponManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	TraceLength = 10000.f;
+	
+	AimFOV = 45.f;
+	AimInterpSpeed = 20.f;
+
 }
 
 void UWeaponManagerComponent::BeginPlay()
@@ -20,14 +25,17 @@ void UWeaponManagerComponent::BeginPlay()
 	Super::BeginPlay();
 	
 	OwnerCharacter = Cast<ABaseCharacter>(GetOwner());
+	if (!OwnerCharacter)
+		return;
 
 	CollQuery.AddIgnoredActor(OwnerCharacter);
 	CollQuery.TraceTag = "Gun Fire Trace";
 
-	if (OwnerCharacter && OwnerCharacter->GetInventoryComponent())
+	if (OwnerCharacter->GetInventoryComponent())
 	{
 		EquippedWeapon = OwnerCharacter->GetInventoryComponent()->GetEquippedWeapon();
 	}
+
 }
 
 void UWeaponManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -47,10 +55,10 @@ void UWeaponManagerComponent::Attack()
 bool UWeaponManagerComponent::CanAttack()
 {
 	//Character Condition Check
-	if (EquippedWeapon)
-		return true;
+	if (!EquippedWeapon)
+		return false;
 
-	return false;
+	return true;
 }
 
 void UWeaponManagerComponent::UpdateAimPoint()
@@ -61,8 +69,43 @@ void UWeaponManagerComponent::UpdateAimPoint()
 	UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraViewPoint(CameraLocation, CameraRotation);
 
 	FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector AimPointTraceEnd = CameraForward * TraceLength;
+	FVector AimPointTraceEnd = CameraLocation + CameraForward * TraceLength;
 	GetWorld()->LineTraceSingleByChannel(CameraAimHitResult, CameraLocation, AimPointTraceEnd, WeaponTraceChannel, CollQuery);
-	DrawDebugLine(GetWorld(), CameraLocation, AimPointTraceEnd, FColor::Red);
-	AimPoint = CameraAimHitResult.Location;
+	AimPoint = CameraAimHitResult.bBlockingHit ? CameraAimHitResult.Location : CameraAimHitResult.TraceEnd;
+}
+
+void UWeaponManagerComponent::SetAiming(bool bNewAiming)
+{
+	bIsAiming = bNewAiming;
+
+	OwnerCharacter->bUseControllerRotationYaw = bIsAiming;
+	OwnerCharacter->GetTDCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+
+	bIsAiming ? StartAiming() : EndAiming();
+}
+
+bool UWeaponManagerComponent::CanAiming()
+{
+	//TODO
+	return true;
+}
+
+void UWeaponManagerComponent::StartAiming()
+{
+	if (!OwnerCharacter)
+		return;
+
+	if (!CanAiming())
+	{
+		EndAiming();
+		return;
+	}
+	
+	bIsAiming = true;
+}
+
+void UWeaponManagerComponent::EndAiming()
+{
+	//TODO
+	bIsAiming = false;
 }

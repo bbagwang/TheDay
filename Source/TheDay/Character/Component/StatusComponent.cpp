@@ -22,16 +22,3 @@ void UStatusComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
-
-void UStatusComponent::SetAiming(bool bNewAiming)
-{
-	bIsAiming = bNewAiming;
-
-	OwnerCharacter->bUseControllerRotationYaw = bNewAiming;
-	OwnerCharacter->GetCharacterMovement()->bOrientRotationToMovement = !bNewAiming;
-}
-
-bool UStatusComponent::CanAiming()
-{
-	return bCanAiming;
-}

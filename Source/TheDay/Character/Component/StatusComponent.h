@@ -51,18 +51,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanDoDamage;
 #pragma endregion
-
-#pragma region Aim
-public:
-	void SetAiming(bool bNewAiming);
-	bool CanAiming();
-
-	FORCEINLINE bool IsAiming() const { return bIsAiming; }
-	
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsAiming;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAiming;
-#pragma endregion
 };

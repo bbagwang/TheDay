@@ -20,17 +20,20 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+#pragma region Wepaon
+	
+#pragma endregion
+	
 	void Attack();
 	bool CanAttack();
-
-	void UpdateAimPoint();
-
+	
+	//����������
 	FORCEINLINE bool IsAttacking() const { return bAttacking; }
-	FORCEINLINE void SetAttacking(bool bNewAttacking) { bAttacking = bNewAttacking; }
-
+	//���� �������� ����
 	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+	//���� ���� ����
 	FORCEINLINE void SetEquippedWeapon(AWeapon* NewWeapon) { EquippedWeapon = NewWeapon; }
-
+	//���� �������� ��ġ ������
 	FORCEINLINE FVector GetAimPoint() { return AimPoint; }
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -52,4 +55,37 @@ protected:
 
 	FCollisionQueryParams CollQuery;
 	FHitResult CameraAimHitResult;
+
+#pragma region Aim
+public:
+	void SetAiming(bool bNewAiming);
+	bool CanAiming();
+
+	FORCEINLINE bool IsAiming() const { return bIsAiming; }
+
+protected:
+	void StartAiming();
+	void EndAiming();
+
+	void UpdateAimPoint();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsAiming;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanAiming;
+#pragma endregion
+
+#pragma region FOV
+public:
+
+	FORCEINLINE float GetAimFOV() const { return AimFOV; }
+	FORCEINLINE float GetAimInterpSpeed() const { return AimInterpSpeed; }
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AimFOV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AimInterpSpeed;
+#pragma endregion
 };
