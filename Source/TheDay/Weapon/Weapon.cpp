@@ -3,6 +3,7 @@
 #include "Weapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Character/BaseCharacter.h"
+#include "Character/Component/WeaponManagerComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -30,6 +31,12 @@ void AWeapon::Attack()
 
 bool AWeapon::CanAttack()
 {
+	if (!OwnerCharacter)
+		return false;
+
+	if (!OwnerCharacter->GetWeaponManagerComponent()->bAttackKeyPressed)
+		return false;
+
 	return true;
 }
 

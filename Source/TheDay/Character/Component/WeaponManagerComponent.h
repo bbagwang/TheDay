@@ -27,20 +27,24 @@ public:
 	void Attack();
 	bool CanAttack();
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//°ø°ÝÁßÀÎÁö
 	FORCEINLINE bool IsAttacking() const { return bAttacking; }
-	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	//ÇöÀç Âø¿ëÁßÀÎ ¹«±â
 	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
-	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	//Âø¿ë ¹«±â ¼³Á¤
 	FORCEINLINE void SetEquippedWeapon(AWeapon* NewWeapon) { EquippedWeapon = NewWeapon; }
-	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ÇöÀç Á¶ÁØÁßÀÎ À§Ä¡ °¡Á®¿È
 	FORCEINLINE FVector GetAimPoint() { return AimPoint; }
+
+public:
+	//°ø°ÝÅ° ´­·È´Â°¡
+	bool bAttackKeyPressed;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanAttack;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AWeapon* EquippedWeapon;
 

@@ -2,7 +2,7 @@
 
 #include "MainCharacter.h"
 
-AMainCharacter::AMainCharacter()
+AMainCharacter::AMainCharacter(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
 
 }

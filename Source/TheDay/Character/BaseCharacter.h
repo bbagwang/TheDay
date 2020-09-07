@@ -18,7 +18,7 @@ class ABaseCharacter : public ACharacter
 	GENERATED_BODY()
 		
 public:
-	ABaseCharacter();
+	ABaseCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -66,5 +66,25 @@ protected:
 	virtual void StartAttack();
 	virtual void EndAttack();
 #pragma endregion
+
+#pragma region Interaction
+protected:
+	virtual void StartInteraction();
+	virtual void EndInteraction();
+#pragma endregion
+
+#pragma region Death
+public:
+	void Dead(bool bForced);
+
+	FORCEINLINE bool IsDead() const { return bDead; }
+
+protected:
+	void StartDead();
+	void EndDead();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bDead;
 #pragma endregion
 };

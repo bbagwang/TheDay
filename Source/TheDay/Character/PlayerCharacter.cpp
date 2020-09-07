@@ -3,31 +3,69 @@
 #include "PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Component/WeaponManagerComponent.h"
 
-APlayerCharacter::APlayerCharacter()
+APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Spring Arm"));
+	SpringArmComponent->SetupAttachment(RootComponent);
+	SpringArmComponent->TargetArmLength = 300.0f;
+	SpringArmComponent->bUsePawnControlRotation = true;
 
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 }
 
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(GetCameraComponent())
+		DefaultFOV = GetCameraComponent()->FieldOfView;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UpdateAimFOV(DeltaTime);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
+}
+
+void APlayerCharacter::StartAiming()
+{
+	Super::StartAiming();
+
+}
+
+void APlayerCharacter::EndAiming()
+{
+	Super::EndAiming();
+
+}
+
+void APlayerCharacter::UpdateAimFOV(float DeltaTime)
+{
+	if (!GetCameraComponent())
+		return;
+
+	if (!GetWeaponManagerComponent())
+		return;
+
+	bool bIsAiming = GetWeaponManagerComponent()->IsAiming();
+
+	float TargetFOV = bIsAiming ? GetWeaponManagerComponent()->GetAimFOV() : DefaultFOV;
+	
+	if (GetCameraComponent()->FieldOfView == TargetFOV)
+		return;
+
+	float InterpSpeed = GetWeaponManagerComponent()->GetAimInterpSpeed();
+	float CurrentFOV = FMath::FInterpTo(GetCameraComponent()->FieldOfView, TargetFOV, DeltaTime, InterpSpeed);
+
+	GetCameraComponent()->SetFieldOfView(CurrentFOV);
 }

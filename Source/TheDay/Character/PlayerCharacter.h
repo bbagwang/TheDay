@@ -12,7 +12,7 @@ class THEDAY_API APlayerCharacter : public AMainCharacter
 	GENERATED_BODY()
 	
 public:
-	APlayerCharacter();
+	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
