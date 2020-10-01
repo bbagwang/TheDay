@@ -5,11 +5,18 @@
 #include "Character/BaseCharacter.h"
 #include "Character/Component/WeaponManagerComponent.h"
 
+const FName AWeapon::WeaponMeshName = TEXT("Weapon Mesh");
+
 AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh"));
+}
+
+void AWeapon::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
 }
 
 void AWeapon::BeginPlay()
@@ -24,6 +31,14 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
+#pragma region Item
+void AWeapon::LoadItemDataFromDataTable()
+{
+	Super::LoadItemDataFromDataTable();
+}
+#pragma endregion
+
+#pragma region Attack
 void AWeapon::Attack()
 {
 
@@ -40,12 +55,52 @@ bool AWeapon::CanAttack()
 	return true;
 }
 
-void AWeapon::StartAttack()
+void AWeapon::CalculateAttackAnimationSpeed()
 {
-
+	AttackAnimationSpeed = 1.f;
+	return;
 }
 
-bool AWeapon::EndAttack()
+void AWeapon::StartAttack()
+{
+	bAttacking = true;
+	CalculateAttackAnimationSpeed();
+}
+
+void AWeapon::EndAttack()
+{
+	bAttacking = false;
+}
+#pragma endregion
+
+#pragma region Aim
+bool AWeapon::CanAiming()
 {
 	return true;
 }
+
+FVector AWeapon::GetAimingDirection()
+{
+	if (OwnerCharacter && OwnerCharacter->GetWeaponManagerComponent())
+	{
+		return OwnerCharacter->GetActorLocation() - OwnerCharacter->GetWeaponManagerComponent()->GetAimPoint();
+	}
+
+	return FVector::ZeroVector;
+}
+#pragma endregion
+
+#pragma region Inventory
+void AWeapon::OnTaken()
+{
+	Super::OnTaken();
+}
+
+bool AWeapon::CanTake()
+{
+	if(!Super::CanTake())
+		return false;
+
+	return true;
+}
+#pragma endregion

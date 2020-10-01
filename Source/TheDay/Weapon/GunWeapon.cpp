@@ -11,14 +11,40 @@
 #include "System/TDPlayerController.h"
 #include "Camera/CameraShake.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "System/TDBlueprintFunctionLibrary.h"
 
 static int32 DebugWeaponLineTrace = 0;
 FAutoConsoleVariableRef CVARDebugWeaponLineTrace(TEXT("td.debugWeaponlinetrace"), DebugWeaponLineTrace, TEXT("Draw Weapon Debug"), ECVF_Cheat);
 
+const FName AGunWeapon::MuzzleSoundComponentName = TEXT("Muzzle Sound");
+const FName AGunWeapon::MuzzleEffectComponentName = TEXT("Muzzle Effect");
+
 AGunWeapon::AGunWeapon()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	MuzzleSoundComponent = CreateDefaultSubobject<UAudioComponent>(MuzzleSoundComponentName);
+	ensure(MuzzleSoundComponent);
+	MuzzleSoundComponent->SetupAttachment(ItemMesh, MuzzleSocketName);
+
+	MuzzleEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>(MuzzleEffectComponentName);
+	ensure(MuzzleEffectComponent);
+	MuzzleEffectComponent->SetupAttachment(ItemMesh, MuzzleSocketName);
 
 	TracerParameterName = "Target";
+
+	if (bWEAPON_DEBUG)
+	{
+		DebugWeaponLineTrace = 1;
+	}
+}
+
+void AGunWeapon::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
 }
 
 void AGunWeapon::BeginPlay()
@@ -31,15 +57,33 @@ void AGunWeapon::BeginPlay()
 	CollQuery.bReturnPhysicalMaterial = true;
 	CollQuery.TraceTag = "Gun Fire Trace";
 
+	ensure(FireSoundQue);
+	MuzzleSoundComponent->SetSound(FireSoundQue);
+
+	ensure(FireMuzzleEffect);
+	MuzzleEffectComponent->SetTemplate(FireMuzzleEffect);
+	MuzzleEffectComponent->DeactivateSystem();
+
 	SetFireRate(FireRate);
 }
 
 void AGunWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!OwnerCharacter)
+		return;
 
+	UpdateFireSpread();
 }
 
+#pragma region Item
+void AGunWeapon::LoadItemDataFromDataTable()
+{
+	Super::LoadItemDataFromDataTable();
+}
+#pragma endregion
+
+#pragma region Attack
 void AGunWeapon::Attack()
 {
 	if (CanAttack())
@@ -51,28 +95,53 @@ bool AGunWeapon::CanAttack()
 	if (!Super::CanAttack())
 		return false;
 
+	if (!CanFire())
+		return false;
+	
 	return true;
+}
+
+void AGunWeapon::CalculateAttackAnimationSpeed()
+{
+	if (!OwnerCharacter)
+	{
+		AttackAnimationSpeed = 1.f;
+		return;
+	}
+	
+	UTDAnimInstance* AnimInst = OwnerCharacter->GetTDAnimInstance();
+	if (!AnimInst)
+	{
+		AttackAnimationSpeed = 1.f;
+		return;
+	}
+
+	FName SectionName = *OwnerCharacter->GenerateAttackMontageSectionName();
+	float CurrentAttackSectionTime = AnimInst->GetAttackMontageSequenceTime(SectionName);
+	AttackAnimationSpeed = (TimeBetweenShots > 0.f) ? CurrentAttackSectionTime / TimeBetweenShots : 1.f;
 }
 
 void AGunWeapon::StartAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StartAttack"));
+	Super::StartAttack();
 
+	UE_LOG(LogTemp, Warning, TEXT("StartAttack"));
+	bAttacking = true;
 	StartFire();
 }
 
-bool AGunWeapon::EndAttack()
+void AGunWeapon::EndAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack"));
-	FireCountFromStart = 0;
 	EndFire();
-	return true;
+	
+	Super::EndAttack();
 }
+#pragma endregion
 
 #pragma region GunWeapon
 void AGunWeapon::StartFire()
 {
-
 	switch (FireMode)
 	{
 	case EGunWeaponFireMode::SEMI_AUTO:
@@ -92,16 +161,19 @@ void AGunWeapon::StartFire()
 
 void AGunWeapon::EndFire()
 {
+	FireCountFromStart = 0;
 	StopRepeatFireTimer();
+	StopFireSound();
 }
 
 void AGunWeapon::Fire()
 {
-	if (!CanFire())
+	if (!CanAttack())
 	{
 		EndAttack();
 		return;
 	}
+
 	FHitResult HitResult;
 	FVector FireStart = CalculateFireStartLocation();
 	FVector FireEnd = CalculateFireEndLocation();
@@ -111,6 +183,7 @@ void AGunWeapon::Fire()
 	PlayFireSound();
 	PlayFireCamShake();
 	SpawnFireTracerEffect(HitResult.TraceStart, bIsHit ? HitResult.ImpactPoint : HitResult.TraceEnd);
+	IncreaseFireSpread();
 
 	if (bIsHit)
 	{
@@ -136,7 +209,7 @@ void AGunWeapon::StartRepeatFireTimer()
 {
 	float FireDelay = LastFiredTime + TimeBetweenShots - GetWorld()->GetTimeSeconds();
 	FireDelay = FMath::Max(FireDelay, 0.f);
-	GetWorldTimerManager().SetTimer(FireTimer, this, &AGunWeapon::Fire,TimeBetweenShots, true, FireDelay);
+	GetWorldTimerManager().SetTimer(FireTimer, this, &AGunWeapon::Fire, TimeBetweenShots, true, FireDelay);
 }
 
 void AGunWeapon::StopRepeatFireTimer()
@@ -169,10 +242,7 @@ void AGunWeapon::SetFireRate(float InFireRate)
 
 bool AGunWeapon::CanFire()
 {
-	if (!CanAttack())
-		return false;
-
-	if (CurrentMagazine < 0 || CurrentAmmo < 0)
+	if (!bInfiniteAmmoMode && (CurrentMagazine <= 0 || CurrentAmmo <= 0))
 		return false;
 
 	if (FireMode==EGunWeaponFireMode::BURST && FireCountFromStart >= BurstFireCount)
@@ -181,10 +251,49 @@ bool AGunWeapon::CanFire()
 	return true;
 }
 
-FTransform AGunWeapon::GetMuzzleTransform() const
+void AGunWeapon::UpdateFireSpread()
 {
-	//추후 소음기 같은게 달리면 Muzzle Transform이 다른 위치일 수 있음
-	return WeaponMesh->GetSocketTransform(MuzzleSocketName);
+	//State Check
+	//Idle, Walk, Sprint, Crouch, Jump
+
+	//FireSpreadMin = TODOCalculate();
+	//FireSpreadMax = TODOCalculate();
+
+	RecoverFireSpread();
+	EVENT_MANAGER(this)->UpdateBulletSpread(FireSpread);
+}
+
+void AGunWeapon::IncreaseFireSpread()
+{
+	//State Check
+	//Idle, Walk, Sprint, Crouch, Jump
+	FireSpread += FireSpreadIncrease;
+	FireSpread = UTDBlueprintFunctionLibrary::Vector2DClamp(FireSpread, FireSpreadMin, FireSpreadMax);
+}
+
+void AGunWeapon::RecoverFireSpread()
+{
+	//State Check
+	//Idle, Walk, Sprint, Crouch, Jump
+	FireSpread -= FireSpreadRecovery;
+	FireSpread = UTDBlueprintFunctionLibrary::Vector2DClamp(FireSpread, FireSpreadMin, FireSpreadMax);
+}
+#pragma endregion
+
+#pragma region Aim
+bool AGunWeapon::CanAiming()
+{
+	return true;
+}
+
+FVector AGunWeapon::GetAimingDirection()
+{
+	if (OwnerCharacter && OwnerCharacter->GetWeaponManagerComponent())
+	{
+		return GetMuzzleLocation() - OwnerCharacter->GetWeaponManagerComponent()->GetAimPoint();
+	}
+
+	return Super::GetAimingDirection();
 }
 #pragma endregion
 
@@ -194,15 +303,30 @@ void AGunWeapon::PlayFireSound()
 	if (!FireSoundQue)
 		return;
 
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSoundQue, CalculateFireStartLocation());
+	if (FireMode == EGunWeaponFireMode::FULL_AUTO)
+	{
+		if (MuzzleSoundComponent->IsPlaying())
+			return;
+	}
+
+	MuzzleSoundComponent->Play();
+}
+
+void AGunWeapon::StopFireSound()
+{
+	if (FireMode == EGunWeaponFireMode::FULL_AUTO)
+	{
+		if (MuzzleSoundComponent->IsPlaying())
+			MuzzleSoundComponent->Stop();
+	}
 }
 
 void AGunWeapon::PlayFireMuzzleEffect()
 {
-	if (!FireMuzzleEffect)
+	if (!MuzzleEffectComponent || !FireMuzzleEffect || !MuzzleEffectComponent->Template)
 		return;
 
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireMuzzleEffect, GetMuzzleTransform());
+	MuzzleEffectComponent->ActivateSystem();
 }
 
 void AGunWeapon::SpawnFireTracerEffect(FVector StartPoint, FVector EndPoint)
@@ -215,12 +339,16 @@ void AGunWeapon::SpawnFireTracerEffect(FVector StartPoint, FVector EndPoint)
 	if (!TracerComponent)
 		return;
 
+	//Bullet Tracer 관련 파라메터
 	TracerComponent->SetVectorParameter(TracerParameterName, EndPoint);
 }
 
 void AGunWeapon::PlayFireCamShake()
 {
 	if (!OwnerCharacter)
+		return;
+	//플레이어가 아닐시 리턴
+	if (!OwnerCharacter->IsPlayerControlled())
 		return;
 
 	ATDPlayerController* PC = Cast<ATDPlayerController>(OwnerCharacter->GetController());
@@ -233,9 +361,25 @@ void AGunWeapon::PlayFireCamShake()
 
 void AGunWeapon::SpawnImpactEffect(FVector SpawnLocation, FRotator SpawnRotation)
 {
-	if (!FireMuzzleEffect)
+	if (!FireImpactEffect)
 		return;
 
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireMuzzleEffect, GetMuzzleTransform());
+	//TODO : Make Impact Spawner
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireImpactEffect, SpawnLocation, SpawnRotation);
+}
+#pragma endregion
+
+#pragma region Inventory
+void AGunWeapon::OnTaken()
+{
+	Super::OnTaken();
+}
+
+bool AGunWeapon::CanTake()
+{
+	if(!Super::CanTake())
+		return false;
+
+	return true;
 }
 #pragma endregion

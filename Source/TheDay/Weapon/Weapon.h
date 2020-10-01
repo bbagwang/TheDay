@@ -3,45 +3,35 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Item/Item.h"
 #include "Common/CommonEnum.h"
 #include "Weapon.generated.h"
 
 class USkeletalMeshComponent;
-class ABaseCharacter;
 
 UCLASS()
-class THEDAY_API AWeapon : public AActor
+class THEDAY_API AWeapon : public AItem
 {
 	GENERATED_BODY()
-	
+
 public:	
 	AWeapon();
-
+	
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+#pragma region Item
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* WeaponMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName WeaponName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText LocalizedName;
+	virtual void LoadItemDataFromDataTable() override;
+#pragma endregion
 
+#pragma region Debug
 protected:
+	//무기 디버그
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EWeaponSlot WeaponSlot;
-
-	UPROPERTY()
-	ABaseCharacter* OwnerCharacter;
-
-public:
-	FORCEINLINE USkeletalMeshComponent* GetMesh() { return WeaponMesh; }
-	FORCEINLINE FName GetWeaponName() const { return WeaponName; }
-	FORCEINLINE FText GetLocalizedName() const { return LocalizedName; }
-	FORCEINLINE EWeaponSlot GetWeaponSlot() const { return WeaponSlot; }
-	FORCEINLINE void SetOwnerCharacter(ABaseCharacter* NewOwnerCharacter) { OwnerCharacter = NewOwnerCharacter; }
+	bool bWEAPON_DEBUG;
+#pragma endregion
 
 #pragma region Weapon
 public:
@@ -50,25 +40,50 @@ public:
 	UFUNCTION(BlueprintPure)
 	virtual bool CanAttack();
 
+	virtual void CalculateAttackAnimationSpeed();
+
+	//공격 상태 반환
+	FORCEINLINE bool IsAttacking() const { return bAttacking; }
+	//무기 슬롯 반환
+	FORCEINLINE EWeaponSlot GetWeaponSlot() const { return WeaponSlot; }
+	FORCEINLINE float GetAttackAnimationSpeed() const { return AttackAnimationSpeed; }
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void StartAttack();
 	UFUNCTION(BlueprintCallable)
-	virtual bool EndAttack();
+	virtual void EndAttack();
+
+protected:
+	//무기 슬롯
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EWeaponSlot WeaponSlot;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bAttacking;
+	UPROPERTY(BlueprintReadOnly)
+	float AttackAnimationSpeed;
 
 #pragma endregion
 
 #pragma region Aim
 public:
-	FORCEINLINE bool IsAiming() const { return bIsAiming; }
-	FORCEINLINE void SetAiming(bool bNewAiming) { bIsAiming = bNewAiming; }
-	FORCEINLINE bool CanAiming() const { return bCanAiming; }
-	FORCEINLINE void SetCanAiming(bool bNewCanAiming) { bCanAiming = bNewCanAiming; }
+	virtual bool CanAiming();
+	virtual FVector GetAimingDirection();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsAiming;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAiming;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimSpeed;
+#pragma endregion
+
+#pragma region Inventory
+public:
+	virtual void OnTaken() override;
+	virtual bool CanTake() override;
+#pragma endregion
+
+#pragma region Names
+protected:
+	static const FName WeaponMeshName;
 #pragma endregion
 };
