@@ -16,6 +16,11 @@ UTDCharacterMovementComponent::UTDCharacterMovementComponent()
 	GetNavAgentPropertiesRef().bCanSwim = true;
 	GetNavAgentPropertiesRef().bCanWalk = true;
 
+	DefaultWalkMaxSpeed = 400.f;
+	DefaultSprintMaxSpeed = 800.f;
+
+	MaxWalkSpeed = DefaultWalkMaxSpeed;
+	MaxWalkSpeedCrouched = DefaultCrouchMaxSpeed;
 }
 
 void UTDCharacterMovementComponent::BeginPlay()
@@ -28,4 +33,10 @@ void UTDCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelTi
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+}
+
+void UTDCharacterMovementComponent::SetSprint(bool bSprint)
+{
+	bSprinting = bSprint;
+	MaxWalkSpeed = bSprinting ? DefaultSprintMaxSpeed : DefaultWalkMaxSpeed;
 }

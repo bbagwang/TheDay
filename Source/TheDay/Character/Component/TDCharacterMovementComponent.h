@@ -17,4 +17,24 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 
+#pragma region Move
+public:
+	FORCEINLINE bool IsSprinting() const { return bSprinting; }
+	FORCEINLINE void SetSprint(bool bSprint);
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DefaultWalkMaxSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DefaultSprintMaxSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float DefaultCrouchMaxSpeed;
+
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	bool bSprinting;
+
+#pragma region
 };
