@@ -6,10 +6,12 @@ public class TheDay : ModuleRules
 {
 	public TheDay(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
         PrivateIncludePaths.Add(ModuleDirectory);
         PublicIncludePaths.Add(ModuleDirectory);
+
+        //PrivatePCHHeaderFile = "TheDay.h";
 
         PublicDependencyModuleNames.AddRange(new string[]
         { "Core", "CoreUObject", "Engine", "InputCore",
