@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Weapon/Weapon.h"
 #include "WeaponManagerComponent.generated.h"
 
-class AWeapon;
 class ABaseCharacter;
-
+class AWeapon;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THEDAY_API UWeaponManagerComponent : public UActorComponent
 {
@@ -21,14 +21,12 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 #pragma region Wepaon
-	
-#pragma endregion
-	
+public:
 	void Attack();
 	bool CanAttack();
 	
 	//공격중인지
-	FORCEINLINE bool IsAttacking() const { return bAttacking; }
+	FORCEINLINE bool IsAttacking();
 	//현재 착용중인 무기
 	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
 	//착용 무기 설정
@@ -41,17 +39,18 @@ public:
 	bool bAttackKeyPressed;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAttacking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AWeapon> StartEquipItemClass;
+
+	UPROPERTY(BlueprintReadOnly)
 	bool bCanAttack;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AWeapon* EquippedWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TraceLength;
+	float AimPointTraceLength;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	FVector AimPoint;
 
 	UPROPERTY()
@@ -59,6 +58,7 @@ protected:
 
 	FCollisionQueryParams CollQuery;
 	FHitResult CameraAimHitResult;
+#pragma endregion
 
 #pragma region Aim
 public:
@@ -74,10 +74,10 @@ protected:
 	void UpdateAimPoint();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsAiming;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAiming;
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsFullyAiming;
 #pragma endregion
 
 #pragma region FOV

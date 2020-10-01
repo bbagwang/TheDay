@@ -22,9 +22,20 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+#pragma region Essential
+protected:
+	void UpdateOwnership(AActor* InActor);
+
+protected:
+	UPROPERTY()
+	ABaseCharacter* OwnerCharacter;
+
+
+#pragma endregion
+
 #pragma region ItemInventory
 public:
-	//새로운 무기를 추가한다.
+	//새로운 아이템을 추가한다.
 	UFUNCTION(BlueprintCallable)
 	void AddItem(AItem* NewItem);
 	//ItemName 으로 아이템 인벤토리에서 아이템을 찾는다.
@@ -37,16 +48,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveItemByName(const FName InItemName);
 
+	void UpdateItemEquipStatus(AItem* InItem, bool bEquip);
+
+	FORCEINLINE AItem* GetEquippedItem() { return EquippedItem; }
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<AItem*> ItemInventory;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	AItem* EquippedItem;
 #pragma endregion
 
 #pragma region WeaponInventory
 public:
 	//새로운 무기를 추가한다.
 	UFUNCTION(BlueprintCallable)
-	void AddWeapon(AWeapon* NewWeapon,bool bEquip);
+	void AddWeapon(AWeapon* NewWeapon, bool bEquip);
 	//무기를 장착한다.
 	UFUNCTION(BlueprintCallable)
 	void EquipWeapon(EWeaponSlot EquipSlot, bool bInstant = false);
@@ -76,14 +93,14 @@ public:
 	void RemoveWeaponBySlot(const EWeaponSlot InSlot);
 
 	FORCEINLINE AWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+
 protected:
-	void UpdateWeaponOwnership(AWeapon* InWeapon);
 	void UpdateWeaponEquipStatus(AWeapon* InWeapon,bool bEquip);
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TMap<EWeaponSlot, AWeapon*> WeaponInventory;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	AWeapon* EquippedWeapon;
-	UPROPERTY()
-	ABaseCharacter* OwnerCharacter;
+#pragma endregion
 };

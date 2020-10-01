@@ -26,10 +26,24 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 }
 
+#pragma region Essential
+void UInventoryComponent::UpdateOwnership(AActor* InActor)
+{
+	if (!InActor || !OwnerCharacter)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Can't Update Ownership!"));
+		return;
+	}
+
+	InActor->SetOwner(OwnerCharacter);
+	InActor->SetInstigator(OwnerCharacter);
+}
+#pragma endregion
+
 #pragma region ItemInventory
 void UInventoryComponent::AddItem(AItem* NewItem)
 {
-
+	ItemInventory.Add(NewItem);
 }
 
 AItem* UInventoryComponent::GetItemByName(const FName InItemName)
@@ -60,6 +74,11 @@ void UInventoryComponent::RemoveItemByName(const FName InItemName)
 	else
 		UE_LOG(LogTemp, Error, TEXT("Can't Remove Item Name : %s"), *InItemName.ToString());
 }
+
+void UInventoryComponent::UpdateItemEquipStatus(AItem* InItem, bool bEquip)
+{
+
+}
 #pragma endregion
 
 #pragma region WeaponInventory
@@ -79,7 +98,7 @@ void UInventoryComponent::AddWeapon(AWeapon* NewWeapon, bool bEquip)
 		DropWeapon(NewWeaponSlot);
 	}
 
-	UpdateWeaponOwnership(NewWeapon);
+	UpdateOwnership(NewWeapon);
 
 	WeaponInventory.Add(NewWeaponSlot, NewWeapon);
 
@@ -103,7 +122,7 @@ void UInventoryComponent::EquipWeapon(EWeaponSlot EquipSlot, bool bInstant /*= f
 	if (OwnerCharacter && OwnerCharacter->GetWeaponManagerComponent())
 	{
 		OwnerCharacter->GetWeaponManagerComponent()->SetEquippedWeapon(EquippedWeapon);
-		
+
 		EquippedWeapon->SetOwnerCharacter(OwnerCharacter);
 		EquippedWeapon->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, CharacterSocketName::HAND_R_SOCKET);
 	}
@@ -128,7 +147,7 @@ AWeapon* UInventoryComponent::GetWeaponByName(const FName InWeaponName)
 			continue;
 
 		AWeapon* WeaponCandidate = Iter.Value;
-		if (WeaponCandidate->GetWeaponName().IsEqual(InWeaponName))
+		if (WeaponCandidate->GetItemName().IsEqual(InWeaponName))
 			return WeaponCandidate;
 		else
 			continue;
@@ -170,18 +189,6 @@ void UInventoryComponent::RemoveWeaponBySlot(const EWeaponSlot InSlot)
 {
 	//TODO : 현재 무기 체크
 	WeaponInventory.Remove(InSlot);
-}
-
-void UInventoryComponent::UpdateWeaponOwnership(AWeapon* InWeapon)
-{
-	if (!InWeapon || !OwnerCharacter)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Can't Find Weapon To Update Ownership!"));
-		return;
-	}
-
-	InWeapon->SetOwner(OwnerCharacter);
-	InWeapon->SetInstigator(OwnerCharacter);
 }
 
 void UInventoryComponent::UpdateWeaponEquipStatus(AWeapon* InWeapon, bool bEquip)

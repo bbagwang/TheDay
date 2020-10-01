@@ -9,21 +9,24 @@
 #include "Common/CommonDefinition.h"
 #include "DrawDebugHelpers.h"
 #include "../PlayerCharacter.h"
+#include "StatusComponent.h"
 
 UWeaponManagerComponent::UWeaponManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	TraceLength = 10000.f;
-	
+	AimPointTraceLength = 10000.f;
+
 	AimFOV = 45.f;
 	AimInterpSpeed = 20.f;
 
+	bIsAiming = false;
+	bIsFullyAiming = false;
 }
 
 void UWeaponManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	OwnerCharacter = Cast<ABaseCharacter>(GetOwner());
 	if (!OwnerCharacter)
 		return;
@@ -31,17 +34,17 @@ void UWeaponManagerComponent::BeginPlay()
 	CollQuery.AddIgnoredActor(OwnerCharacter);
 	CollQuery.TraceTag = "Gun Fire Trace";
 
-	if (OwnerCharacter->GetInventoryComponent())
-	{
-		EquippedWeapon = OwnerCharacter->GetInventoryComponent()->GetEquippedWeapon();
-	}
+	AWeapon* StartEquipItem = GetWorld()->SpawnActor<AWeapon>(StartEquipItemClass);
+
+	if (StartEquipItem && OwnerCharacter->GetInventoryComponent())
+		OwnerCharacter->GetInventoryComponent()->AddWeapon(StartEquipItem, true);
 
 }
 
 void UWeaponManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateAimPoint();	
+	UpdateAimPoint();
 }
 
 void UWeaponManagerComponent::Attack()
@@ -61,6 +64,11 @@ bool UWeaponManagerComponent::CanAttack()
 	return true;
 }
 
+bool UWeaponManagerComponent::IsAttacking()
+{
+	return EquippedWeapon ? EquippedWeapon->IsAttacking() : false;
+}
+
 void UWeaponManagerComponent::UpdateAimPoint()
 {
 	FVector CameraLocation;
@@ -69,38 +77,41 @@ void UWeaponManagerComponent::UpdateAimPoint()
 	UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraViewPoint(CameraLocation, CameraRotation);
 
 	FVector CameraForward = UKismetMathLibrary::GetForwardVector(CameraRotation);
-	FVector AimPointTraceEnd = CameraLocation + CameraForward * TraceLength;
+	FVector AimPointTraceEnd = CameraLocation + CameraForward * AimPointTraceLength;
 	GetWorld()->LineTraceSingleByChannel(CameraAimHitResult, CameraLocation, AimPointTraceEnd, WeaponTraceChannel, CollQuery);
 	AimPoint = CameraAimHitResult.bBlockingHit ? CameraAimHitResult.Location : CameraAimHitResult.TraceEnd;
 }
 
 void UWeaponManagerComponent::SetAiming(bool bNewAiming)
 {
-	bIsAiming = bNewAiming;
+	//OwnerCharacter->bUseControllerRotationYaw = bIsAiming;
+	//OwnerCharacter->GetTDCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
 
-	OwnerCharacter->bUseControllerRotationYaw = bIsAiming;
-	OwnerCharacter->GetTDCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
-
-	bIsAiming ? StartAiming() : EndAiming();
+	bNewAiming ? StartAiming() : EndAiming();
 }
 
 bool UWeaponManagerComponent::CanAiming()
 {
-	//TODO
+	if (!OwnerCharacter)
+		return false;
+	if (!OwnerCharacter->GetStatusComponent())
+		return false;
+	if (OwnerCharacter->GetStatusComponent()->IsDying() || OwnerCharacter->GetStatusComponent()->IsDead())
+		return false;
+	if (!EquippedWeapon->CanAiming())
+		return false;
+
 	return true;
 }
 
 void UWeaponManagerComponent::StartAiming()
 {
-	if (!OwnerCharacter)
-		return;
-
 	if (!CanAiming())
 	{
 		EndAiming();
 		return;
 	}
-	
+
 	bIsAiming = true;
 }
 
