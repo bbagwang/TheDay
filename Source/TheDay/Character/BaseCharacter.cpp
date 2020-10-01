@@ -13,6 +13,9 @@
 #include "Component/WeaponManagerComponent.h"
 #include "Component/TDCharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "System/TDPlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Common/CommonNameSpace.h"
 
 ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDCharacterMovementComponent>(CharacterMovementComponentName))
@@ -57,26 +60,34 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABaseCharacter::StartAiming);
-	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABaseCharacter::EndAiming);
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABaseCharacter::StartCrouch);
-	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ABaseCharacter::EndCrouch);
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &ABaseCharacter::StartAttack);
-	PlayerInputComponent->BindAction("Attack", IE_Released, this, &ABaseCharacter::EndAttack);
-	PlayerInputComponent->BindAction("Interaction", IE_Pressed, this, &ABaseCharacter::StartInteraction);
-	PlayerInputComponent->BindAction("Interaction", IE_Released, this, &ABaseCharacter::EndInteraction);
+	//Control
+	PlayerInputComponent->BindAction(InputKeyName::JUMP, IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction(InputKeyName::JUMP, IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction(InputKeyName::CROUCH, IE_Pressed, this, &ABaseCharacter::Input_StartCrouch);
+	PlayerInputComponent->BindAction(InputKeyName::CROUCH, IE_Released, this, &ABaseCharacter::Input_EndCrouch);
+	PlayerInputComponent->BindAction(InputKeyName::SPRINT, IE_Pressed, this, &ABaseCharacter::Input_StartSprint);
+	PlayerInputComponent->BindAction(InputKeyName::SPRINT, IE_Released, this, &ABaseCharacter::Input_EndSprint);
+	//Combat
+	PlayerInputComponent->BindAction(InputKeyName::AIM, IE_Pressed, this, &ABaseCharacter::Input_StartAiming);
+	PlayerInputComponent->BindAction(InputKeyName::AIM, IE_Released, this, &ABaseCharacter::Input_EndAiming);
+	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Pressed, this, &ABaseCharacter::Input_StartAttack);
+	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Released, this, &ABaseCharacter::Input_EndAttack);
+	
+	//Interaction
+	PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Pressed, this, &ABaseCharacter::Input_StartInteraction);
+	PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Released, this, &ABaseCharacter::Input_EndInteraction);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &ABaseCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ABaseCharacter::MoveRight);
+	//Control
+	PlayerInputComponent->BindAxis(InputKeyName::MOVE_FORWARD, this, &ABaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(InputKeyName::MOVE_RIGHT, this, &ABaseCharacter::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &ABaseCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &ABaseCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis(InputKeyName::TURN, this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis(InputKeyName::TURN_RATE, this, &ABaseCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis(InputKeyName::LOOKUP, this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis(InputKeyName::LOOKUP_RATE, this, &ABaseCharacter::LookUpAtRate);
 }
 
 void ABaseCharacter::TurnAtRate(float Rate)
@@ -113,7 +124,7 @@ void ABaseCharacter::MoveRight(float Value)
 	}
 }
 
-void ABaseCharacter::StartAiming()
+void ABaseCharacter::Input_StartAiming()
 {
 	if (!GetWeaponManagerComponent())
 		return;
@@ -121,7 +132,7 @@ void ABaseCharacter::StartAiming()
 	GetWeaponManagerComponent()->SetAiming(true);
 }
 
-void ABaseCharacter::EndAiming()
+void ABaseCharacter::Input_EndAiming()
 {
 	if (!GetWeaponManagerComponent())
 		return;
@@ -131,27 +142,52 @@ void ABaseCharacter::EndAiming()
 #pragma endregion
 
 #pragma region Crouch
-void ABaseCharacter::StartCrouch()
+void ABaseCharacter::Input_StartCrouch()
 {
 	Crouch();
 }
 
-void ABaseCharacter::EndCrouch()
+void ABaseCharacter::Input_EndCrouch()
 {
 	UnCrouch();
 }
+
+void ABaseCharacter::Input_StartSprint()
+{
+	if (GetTDCharacterMovement())
+		GetTDCharacterMovement()->SetSprint(true);
+}
+
+void ABaseCharacter::Input_EndSprint()
+{
+	if (GetTDCharacterMovement())
+		GetTDCharacterMovement()->SetSprint(false);
+}
+
+FString ABaseCharacter::GenerateAttackMontageSectionName()
+{
+	FString SectionName;
+	if (GetTDCharacterMovement()&&GetTDCharacterMovement()->IsCrouching())
+		SectionName.Append(TEXT("Crouch"));
+	else
+		SectionName.Append(TEXT("Stand"));
+
+	return SectionName;
+}
+
 #pragma endregion
 
 #pragma region Attack
-void ABaseCharacter::StartAttack()
+void ABaseCharacter::Input_StartAttack()
 {
 	if (!WeaponManagerComponent)
 		return;
+	
 	WeaponManagerComponent->bAttackKeyPressed = true;
 	WeaponManagerComponent->Attack();
 }
 
-void ABaseCharacter::EndAttack()
+void ABaseCharacter::Input_EndAttack()
 {
 	if (!WeaponManagerComponent)
 		return;
@@ -161,13 +197,13 @@ void ABaseCharacter::EndAttack()
 #pragma endregion
 
 #pragma region Interaction
-void ABaseCharacter::StartInteraction()
+void ABaseCharacter::Input_StartInteraction()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start Interaction"));
 
 }
 
-void ABaseCharacter::EndInteraction()
+void ABaseCharacter::Input_EndInteraction()
 {
 	UE_LOG(LogTemp, Warning, TEXT("End Interaction"));
 
@@ -175,33 +211,32 @@ void ABaseCharacter::EndInteraction()
 #pragma endregion
 
 #pragma region Dead
-void ABaseCharacter::Dead(bool bForced)
+void ABaseCharacter::Dead(bool bInstantDead, bool bRagdollMode /*= true*/)
 {
-	if (bDead)
-		return;
-	
-	if (!bForced)
-	{
-		if (GetStatusComponent())
-		{
-			if (GetStatusComponent()->GetHealth() >= 0.f)
-				return;
-		}
-	}
-
-	StartDead();
+	StartDead(bInstantDead, bRagdollMode);
 }
 
-void ABaseCharacter::StartDead()
+void ABaseCharacter::StartDead(bool bInstantDead, bool bRagdollMode /*= true*/)
 {
 	GetTDCharacterMovement()->StopMovementImmediately();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	ATDPlayerController* PC = Cast<ATDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (!PC)
+	{
+		EndDead();
+		return;
+	}
 	//Anim Processing
+	if (bInstantDead)
+	{
+		EndDead();
+	}
 }
 
 void ABaseCharacter::EndDead()
 {
-	bDead = true;
+	if (!StatusComponent)
+		return;
+
 }
 #pragma endregion

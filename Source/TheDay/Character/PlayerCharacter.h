@@ -31,8 +31,8 @@ public:
 	FORCEINLINE class UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 
 #pragma region Aim
-	virtual void StartAiming() override;
-	virtual void EndAiming() override;
+	virtual void Input_StartAiming() override;
+	virtual void Input_EndAiming() override;
 #pragma endregion
 
 #pragma region FOV

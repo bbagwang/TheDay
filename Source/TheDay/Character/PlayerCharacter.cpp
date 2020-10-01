@@ -5,6 +5,10 @@
 #include "Camera/CameraComponent.h"
 #include "Component/WeaponManagerComponent.h"
 
+static int32 DebugWeaponAiming = 0;
+FAutoConsoleVariableRef CVARDebugAiming(TEXT("td.setaiming"), DebugWeaponAiming, TEXT("0 : NoAim 1 : Aim"), ECVF_Cheat);
+
+
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Spring Arm"));
@@ -29,23 +33,29 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateAimFOV(DeltaTime);
+
+	if (IsPlayerControlled() && DebugWeaponAiming)
+	{
+		Input_StartAiming();
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
-}
-
-void APlayerCharacter::StartAiming()
-{
-	Super::StartAiming();
 
 }
 
-void APlayerCharacter::EndAiming()
+void APlayerCharacter::Input_StartAiming()
 {
-	Super::EndAiming();
+	Super::Input_StartAiming();
+
+}
+
+void APlayerCharacter::Input_EndAiming()
+{
+	Super::Input_EndAiming();
 
 }
 
