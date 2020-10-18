@@ -103,3 +103,5 @@ Wwise/.cache
 
 # Temp Ignore
 enc_temp_folder/*
+.idea/.idea.TheDay/.idea/workspace.xml
+.idea/.idea.TheDay/.idea/contentModel.xml
