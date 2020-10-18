@@ -12,10 +12,17 @@
 #include "Component/InventoryComponent.h"
 #include "Component/WeaponManagerComponent.h"
 #include "Component/TDCharacterMovementComponent.h"
+#include "Item/Component/InteractionComponent.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "System/TDPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Common/CommonNameSpace.h"
+
+const FName ABaseCharacter::StatusComponentName = TEXT("Status Component");
+const FName ABaseCharacter::InventoryComponentName = TEXT("Inventory Component");
+const FName ABaseCharacter::WeaponManagerComponentName = TEXT("Weapon Manager Component");
+const FName ABaseCharacter::InteractionComponentName = TEXT("Interaction Component");
 
 ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDCharacterMovementComponent>(CharacterMovementComponentName))
@@ -40,12 +47,15 @@ ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanSwim = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanWalk = true;
 
-	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("Status Component"));
-	ensure(StatusComponent);
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
-	ensure(InventoryComponent);
-	WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(TEXT("Weapon Manager Component"));
-	ensure(WeaponManagerComponent);
+    StatusComponent = CreateDefaultSubobject<UStatusComponent>(StatusComponentName);
+    ensure(StatusComponent);
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(InventoryComponentName);
+    ensure(InventoryComponent);
+    WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(WeaponManagerComponentName);
+    ensure(WeaponManagerComponent);
+    InteractionComponent = CreateOptionalDefaultSubobject<UInteractionComponent>(InteractionComponentName);
+    if (InteractionComponent)
+        InteractionComponent->SetupAttachment(GetMesh());
 }
 
 void ABaseCharacter::BeginPlay()
@@ -76,9 +86,6 @@ void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Pressed, this, &ABaseCharacter::Input_StartAttack);
 	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Released, this, &ABaseCharacter::Input_EndAttack);
 	
-	//Interaction
-	PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Pressed, this, &ABaseCharacter::Input_StartInteraction);
-	PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Released, this, &ABaseCharacter::Input_EndInteraction);
 
 	//Control
 	PlayerInputComponent->BindAxis(InputKeyName::MOVE_FORWARD, this, &ABaseCharacter::MoveForward);
@@ -180,40 +187,26 @@ FString ABaseCharacter::GenerateAttackMontageSectionName()
 #pragma region Attack
 void ABaseCharacter::Input_StartAttack()
 {
-	if (!WeaponManagerComponent)
-		return;
-	
-	WeaponManagerComponent->bAttackKeyPressed = true;
-	WeaponManagerComponent->Attack();
+    if (!WeaponManagerComponent)
+        return;
+
+    WeaponManagerComponent->bAttackKeyPressed = true;
+    WeaponManagerComponent->Attack();
 }
 
 void ABaseCharacter::Input_EndAttack()
 {
-	if (!WeaponManagerComponent)
-		return;
+    if (!WeaponManagerComponent)
+        return;
 
-	WeaponManagerComponent->bAttackKeyPressed = false;
-}
-#pragma endregion
-
-#pragma region Interaction
-void ABaseCharacter::Input_StartInteraction()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Start Interaction"));
-
-}
-
-void ABaseCharacter::Input_EndInteraction()
-{
-	UE_LOG(LogTemp, Warning, TEXT("End Interaction"));
-
+    WeaponManagerComponent->bAttackKeyPressed = false;
 }
 #pragma endregion
 
 #pragma region Dead
 void ABaseCharacter::Dead(bool bInstantDead, bool bRagdollMode /*= true*/)
 {
-	StartDead(bInstantDead, bRagdollMode);
+    StartDead(bInstantDead, bRagdollMode);
 }
 
 void ABaseCharacter::StartDead(bool bInstantDead, bool bRagdollMode /*= true*/)

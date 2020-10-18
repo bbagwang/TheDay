@@ -12,6 +12,7 @@ class UStatusComponent;
 class UInventoryComponent;
 class UWeaponManagerComponent;
 class UTDCharacterMovementComponent;
+class UInteractionComponent;
 
 UCLASS(config=Game)
 class ABaseCharacter : public ACharacter
@@ -38,6 +39,7 @@ public:
 	FORCEINLINE UWeaponManagerComponent* GetWeaponManagerComponent() { return WeaponManagerComponent; }
 	FORCEINLINE UTDCharacterMovementComponent* GetTDCharacterMovement() { return Cast<UTDCharacterMovementComponent>(GetCharacterMovement()); }
 	FORCEINLINE UTDAnimInstance* GetTDAnimInstance() { return GetMesh() ? Cast<UTDAnimInstance>(GetMesh()->GetAnimInstance()) : nullptr; }
+    FORCEINLINE UInteractionComponent* GetInteractionComponent() { return InteractionComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -46,6 +48,8 @@ protected:
 	class UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UWeaponManagerComponent* WeaponManagerComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UInteractionComponent* InteractionComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseTurnRate;
@@ -79,12 +83,6 @@ protected:
 	virtual void Input_EndAttack();
 #pragma endregion
 
-#pragma region Interaction
-protected:
-	virtual void Input_StartInteraction();
-	virtual void Input_EndInteraction();
-#pragma endregion
-
 #pragma region Death
 public:
 	void Dead(bool bInstantDead, bool bRagdollMode = true);
@@ -93,5 +91,13 @@ protected:
 	void StartDead(bool bInstantDead, bool bRagdollMode = true);
 	void EndDead();
 
+#pragma endregion
+	
+#pragma region Names
+protected:
+    static const FName StatusComponentName;
+    static const FName InventoryComponentName;
+    static const FName WeaponManagerComponentName;
+    static const FName InteractionComponentName;
 #pragma endregion
 };

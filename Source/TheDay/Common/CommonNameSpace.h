@@ -39,5 +39,9 @@ namespace InputKeyName
 	static const FName TURN_RATE = TEXT("TurnRate");
 	static const FName LOOKUP = TEXT("LookUp");
 	static const FName LOOKUP_RATE = TEXT("LookUpRate");
-	
+}
+
+namespace CollisionProfileName
+{
+    static const FName INTERACTION = TEXT("Interaction");
 }

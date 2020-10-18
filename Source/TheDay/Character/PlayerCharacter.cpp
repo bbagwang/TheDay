@@ -3,13 +3,15 @@
 #include "PlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Common/CommonNameSpace.h"
 #include "Component/WeaponManagerComponent.h"
+#include "Item/Component/InteractionComponent.h"
 
 static int32 DebugWeaponAiming = 0;
 FAutoConsoleVariableRef CVARDebugAiming(TEXT("td.setaiming"), DebugWeaponAiming, TEXT("0 : NoAim 1 : Aim"), ECVF_Cheat);
 
-
-APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
+APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
+    :Super(ObjectInitializer.DoNotCreateDefaultSubobject(InteractionComponentName))
 {
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Spring Arm"));
 	SpringArmComponent->SetupAttachment(RootComponent);
@@ -18,6 +20,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer) 
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+    InteractionMasterComponent = CreateDefaultSubobject<UInteractionMasterComponent>(TEXT("Interaction Master Component"));
+    ensure(InteractionMasterComponent);
+    InteractionMasterComponent->SetupAttachment(RootComponent);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -45,19 +50,38 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 
+    //Interaction
+    PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Pressed, this, &APlayerCharacter::Input_StartInteraction);
+    PlayerInputComponent->BindAction(InputKeyName::INTERACTION, IE_Released, this,  &APlayerCharacter::Input_EndInteraction);
 }
 
 void APlayerCharacter::Input_StartAiming()
 {
-	Super::Input_StartAiming();
-
+    Super::Input_StartAiming();
 }
 
 void APlayerCharacter::Input_EndAiming()
 {
-	Super::Input_EndAiming();
-
+    Super::Input_EndAiming();
 }
+
+#pragma region Interaction
+void APlayerCharacter::Input_StartInteraction()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Start Interaction"));
+
+    if (InteractionMasterComponent)
+        InteractionMasterComponent->OnPressInteractionKey();
+}
+
+void APlayerCharacter::Input_EndInteraction()
+{
+    UE_LOG(LogTemp, Warning, TEXT("End Interaction"));
+
+    if (InteractionMasterComponent)
+        InteractionMasterComponent->OnReleaseInteractionKey();
+}
+#pragma endregion
 
 void APlayerCharacter::UpdateAimFOV(float DeltaTime)
 {

@@ -8,6 +8,10 @@
 #define WeaponTraceChannel ECC_GameTraceChannel1
 #pragma endregion
 
+#pragma region ObjectChannel
+#define InteractionObjectChannel ECC_GameTraceChannel2
+#pragma endregion
+
 #pragma region Globals
 #define TDGAME_INSTANCE(object) (Cast<UTDGameInstance>(object->GetWorld()->GetGameInstance()))
 #define EVENT_MANAGER(object) (TDGAME_INSTANCE(object)->EventManager)
