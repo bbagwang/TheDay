@@ -75,22 +75,54 @@ bool AItem::CanTake()
 #pragma endregion
 
 #pragma region Interaction
+// void AItem::Interact()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Interact"));
+// }
+
+void AItem::Interact_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Interact Impl"));
+}
+
+// void AItem::OnCompleteInteraction()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Completed"));
+// }
+
 void AItem::OnCompleteInteraction_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Completed"));
+	UE_LOG(LogTemp, Warning, TEXT("Completed Impl"));
 }
+
+// void AItem::OnCancelInteraction()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Cancel"));
+// }
 
 void AItem::OnCancelInteraction_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Cancel"));
+	UE_LOG(LogTemp, Warning, TEXT("Cancel Impl"));
+}
+
+// void AItem::CanInteract()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Can Interact"));
+// }
+
+bool AItem::CanInteract_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Can Interact Impl"));
+	return true;
 }
 
 void AItem::OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Item Interactor Begin Overlap"));
 }
 
 void AItem::OnInteractionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("Item Interactor End Overlap"));
 }
 #pragma endregion

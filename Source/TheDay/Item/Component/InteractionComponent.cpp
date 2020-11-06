@@ -1,9 +1,8 @@
 // Copyright BBAGWANG SOFT, Inc. All Rights Reserved.
 
 #include "InteractionComponent.h"
-
-#include "AssetTypeCategories.h"
 #include "Common/CommonNameSpace.h"
+#include "Interface/InteractionInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 static int32 DebugInteractionSearch = 0;
@@ -44,11 +43,20 @@ void UInteractionComponent::Interact()
 {
     if (!CanInteract())
         return;
+
+    AActor* InteractorOwner = GetOwner();
+    if(InteractorOwner&&InteractorOwner->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+    {
+        if(IInteractionInterface::Execute_CanInteract(InteractorOwner))
+        {
+            IInteractionInterface::Execute_Interact(InteractorOwner);
+        }
+    }
 }
 
 bool UInteractionComponent::CanInteract()
 {
-    if (bInteractionActive)
+    if (!bInteractionActive)
         return false;
     if (bInteracting)
         return false;
@@ -70,6 +78,7 @@ void UInteractionComponent::EndInteraction()
     bInteracting = false;
     bInteractionActive = !bOneTimeInteractor;
     SetComponentTickEnabled(false);
+    
     ReceiveEndInteraction();
 }
 #pragma endregion
@@ -146,12 +155,14 @@ void UInteractionMasterComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 void UInteractionMasterComponent::OnPressInteractionKey()
 {
     bInteractionKeyPressed = true;
+    UE_LOG(LogTemp,Warning,TEXT("Interaction Key Pressed!"));
 }
 
 void UInteractionMasterComponent::OnReleaseInteractionKey()
 {
     bInteractionKeyPressed = false;
     ElapsedInteractTime = 0.f;
+    UE_LOG(LogTemp,Warning,TEXT("Interaction Key Released!"));
 }
 
 void UInteractionMasterComponent::OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -191,14 +202,23 @@ void UInteractionMasterComponent::UpdateTargetInteractor()
     FVector MasterLocation = GetComponentLocation();
 
     static UInteractionComponent* NearestInteractor = nullptr;
-    static float NearestDistance = std::numeric_limits<float>::max();
+    static float NearestDistance = FLT_MAX;
 
     for (UInteractionComponent* Iter : Interactors)
     {
-        if (Iter->CanInteract())
+        if (!Iter)
             return;
 
+        AActor* IterOwner = Iter->GetOwner();
+        if(!IterOwner||IterOwner==GetOwner())
+            return;
+
+        //PROBLEM!
+        // if(IterOwner->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+        //     return;
+        
         bool bBlcoked = World->LineTraceSingleByChannel(HitResult, MasterLocation, Iter->GetComponentLocation(), ECC_Visibility);
+
         if (DebugInteractionSearch > 0)
         {
             // #if ENABLE_DRAW_DEBUG

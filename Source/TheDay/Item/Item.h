@@ -64,13 +64,15 @@ public:
 
 #pragma region Interaction
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
-	void OnCompleteInteraction();
+    // virtual void Interact() override;
+	virtual void Interact_Implementation() override;
+	// virtual void OnCompleteInteraction() override;
 	virtual void OnCompleteInteraction_Implementation() override;
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
-	void OnCancelInteraction();
+	// virtual void OnCancelInteraction() override;
 	virtual void OnCancelInteraction_Implementation() override;
-
+	// virtual void CanInteract() override;
+	virtual bool CanInteract_Implementation() override;
+	
 	UFUNCTION()
 	virtual void OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()

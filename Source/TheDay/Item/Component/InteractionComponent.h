@@ -104,7 +104,7 @@ protected:
     float ElapsedInteractTime;
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
     bool bInteractionKeyPressed;
-
+    
 private:
     UPROPERTY(VisibleAnywhere,BlueprintReadOnly,meta=(AllowPrivateAccess="true"))
     TArray<UInteractionComponent*> Interactors;

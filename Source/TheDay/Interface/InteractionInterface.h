@@ -17,8 +17,12 @@ class THEDAY_API IInteractionInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	void Interact();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void OnCompleteInteraction();
-	UFUNCTION(BlueprintNativeEvent, Category = "Interaction")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void OnCancelInteraction();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	bool CanInteract();
 };
