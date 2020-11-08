@@ -64,15 +64,14 @@ public:
 
 #pragma region Interaction
 public:
-    // virtual void Interact() override;
+	//Interaction Interface ~
 	virtual void Interact_Implementation() override;
-	// virtual void OnCompleteInteraction() override;
 	virtual void OnCompleteInteraction_Implementation() override;
-	// virtual void OnCancelInteraction() override;
 	virtual void OnCancelInteraction_Implementation() override;
-	// virtual void CanInteract() override;
 	virtual bool CanInteract_Implementation() override;
-	
+	virtual FInteractionWidgetBaseData GetInteractionWidgetData_Implementation() override;
+	//~ Interaction Interface
+
 	UFUNCTION()
 	virtual void OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()

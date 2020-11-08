@@ -116,6 +116,15 @@ bool AItem::CanInteract_Implementation()
 	return true;
 }
 
+FInteractionWidgetBaseData AItem::GetInteractionWidgetData_Implementation()
+{
+	FInteractionWidgetBaseData InteractionWidgetData;
+	InteractionWidgetData.bCanInteract = IInteractionInterface::Execute_CanInteract(this);
+	InteractionWidgetData.LocalizedDisplayText = GetLocalizedText();
+
+	return InteractionWidgetData;
+}
+
 void AItem::OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Item Interactor Begin Overlap"));

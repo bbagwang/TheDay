@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Common/CommonStruct.h"
 #include "InteractionInterface.generated.h"
 
 UINTERFACE(MinimalAPI)
@@ -25,4 +26,6 @@ public:
 	void OnCancelInteraction();
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	bool CanInteract();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	FInteractionWidgetBaseData GetInteractionWidgetData();
 };

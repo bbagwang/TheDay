@@ -5,7 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Common/CommonNameSpace.h"
 #include "Component/WeaponManagerComponent.h"
-#include "Item/Component/InteractionComponent.h"
+#include "Component/InteractionMasterComponent.h"
 
 static int32 DebugWeaponAiming = 0;
 FAutoConsoleVariableRef CVARDebugAiming(TEXT("td.setaiming"), DebugWeaponAiming, TEXT("0 : NoAim 1 : Aim"), ECVF_Cheat);
