@@ -64,6 +64,9 @@ void AGunWeapon::BeginPlay()
 	MuzzleEffectComponent->SetTemplate(FireMuzzleEffect);
 	MuzzleEffectComponent->DeactivateSystem();
 
+	ensure(FireMontage);
+	//ensure(ReloadMontage);
+
 	SetFireRate(FireRate);
 }
 
@@ -86,8 +89,7 @@ void AGunWeapon::LoadItemDataFromDataTable()
 #pragma region Attack
 void AGunWeapon::Attack()
 {
-	if (CanAttack())
-		StartAttack();
+	StartAttack();
 }
 
 bool AGunWeapon::CanAttack()
@@ -97,27 +99,19 @@ bool AGunWeapon::CanAttack()
 
 	if (!CanFire())
 		return false;
-	
+
 	return true;
 }
 
 void AGunWeapon::CalculateAttackAnimationSpeed()
 {
-	if (!OwnerCharacter)
-	{
-		AttackAnimationSpeed = 1.f;
-		return;
-	}
-	
-	UTDAnimInstance* AnimInst = OwnerCharacter->GetTDAnimInstance();
-	if (!AnimInst)
+	if (!OwnerCharacter || !FireMontage)
 	{
 		AttackAnimationSpeed = 1.f;
 		return;
 	}
 
-	FName SectionName = *OwnerCharacter->GenerateAttackMontageSectionName();
-	float CurrentAttackSectionTime = AnimInst->GetAttackMontageSequenceTime(SectionName);
+	float CurrentAttackSectionTime = FireMontage->GetSectionLength(FireMontage->GetSectionIndex(TEXT("Default")));
 	AttackAnimationSpeed = (TimeBetweenShots > 0.f) ? CurrentAttackSectionTime / TimeBetweenShots : 1.f;
 }
 
@@ -127,6 +121,7 @@ void AGunWeapon::StartAttack()
 
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack"));
 	bAttacking = true;
+	CalculateAttackAnimationSpeed();
 	StartFire();
 }
 
@@ -134,7 +129,7 @@ void AGunWeapon::EndAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack"));
 	EndFire();
-	
+
 	Super::EndAttack();
 }
 #pragma endregion
@@ -142,6 +137,7 @@ void AGunWeapon::EndAttack()
 #pragma region GunWeapon
 void AGunWeapon::StartFire()
 {
+	PlayFireMontage();
 	switch (FireMode)
 	{
 	case EGunWeaponFireMode::SEMI_AUTO:
@@ -164,6 +160,7 @@ void AGunWeapon::EndFire()
 	FireCountFromStart = 0;
 	StopRepeatFireTimer();
 	StopFireSound();
+	StopFireMontage();
 }
 
 void AGunWeapon::Fire()
@@ -183,12 +180,13 @@ void AGunWeapon::Fire()
 	PlayFireSound();
 	PlayFireCamShake();
 	SpawnFireTracerEffect(HitResult.TraceStart, bIsHit ? HitResult.ImpactPoint : HitResult.TraceEnd);
+	SpawnEjectShellEffect();
 	IncreaseFireSpread();
 
 	if (bIsHit)
 	{
 		SpawnImpactEffect(HitResult.ImpactPoint, HitResult.ImpactNormal.Rotation());
-	
+
 		ATDPlayerController* PC = Cast<ATDPlayerController>(OwnerCharacter->GetController());
 		UGameplayStatics::ApplyPointDamage(HitResult.GetActor(), BaseDamage, HitResult.TraceEnd - HitResult.TraceStart, HitResult, PC ? PC : nullptr, this, DamageType);
 	}
@@ -245,7 +243,7 @@ bool AGunWeapon::CanFire()
 	if (!bInfiniteAmmoMode && (CurrentMagazine <= 0 || CurrentAmmo <= 0))
 		return false;
 
-	if (FireMode==EGunWeaponFireMode::BURST && FireCountFromStart >= BurstFireCount)
+	if (FireMode == EGunWeaponFireMode::BURST && FireCountFromStart >= BurstFireCount)
 		return false;
 
 	return true;
@@ -367,6 +365,49 @@ void AGunWeapon::SpawnImpactEffect(FVector SpawnLocation, FRotator SpawnRotation
 	//TODO : Make Impact Spawner
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireImpactEffect, SpawnLocation, SpawnRotation);
 }
+
+void AGunWeapon::SpawnEjectShellEffect()
+{
+	FVector EjectShellLocation;
+	FRotator EjectShellRotation;
+	ItemMesh->GetSocketWorldLocationAndRotation(EjectShellSocketName, EjectShellLocation, EjectShellRotation);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), EjectShellEffect, EjectShellLocation, EjectShellRotation);
+}
+#pragma endregion
+
+#pragma region Montage
+void AGunWeapon::PlayFireMontage()
+{
+	if (ItemMesh && FireMontage)
+	{
+		UAnimInstance* ItemAnimInstance = ItemMesh->GetAnimInstance();
+		if (ItemAnimInstance)
+		{
+			ItemAnimInstance->Montage_Play(FireMontage, AttackAnimationSpeed);
+
+			////Loop
+			//FName CurrentSection = ItemAnimInstance->Montage_GetCurrentSection(FireMontage);
+			//ItemAnimInstance->Montage_SetNextSection(CurrentSection, CurrentSection, FireMontage);
+		}
+	}
+}
+
+void AGunWeapon::StopFireMontage()
+{
+	if (ItemMesh && FireMontage)
+	{
+		UAnimInstance* ItemAnimInstance = ItemMesh->GetAnimInstance();
+		if (ItemAnimInstance)
+		{
+			ItemAnimInstance->Montage_Stop(0.f, FireMontage);
+		}
+	}
+}
+
+void AGunWeapon::PlayReloadMontage()
+{
+
+}
 #pragma endregion
 
 #pragma region Inventory
@@ -377,7 +418,7 @@ void AGunWeapon::OnTaken()
 
 bool AGunWeapon::CanTake()
 {
-	if(!Super::CanTake())
+	if (!Super::CanTake())
 		return false;
 
 	return true;

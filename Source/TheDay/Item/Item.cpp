@@ -113,6 +113,9 @@ void AItem::OnCancelInteraction_Implementation()
 bool AItem::CanInteract_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Can Interact Impl"));
+	if(!InteractionComponent->CanInteract())
+		return false;
+
 	return true;
 }
 

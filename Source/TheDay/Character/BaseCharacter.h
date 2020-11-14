@@ -8,18 +8,17 @@
 #include "TDAnimInstance.h"
 #include "BaseCharacter.generated.h"
 
-class UStatusComponent;
 class UInventoryComponent;
 class UWeaponManagerComponent;
 class UTDCharacterMovementComponent;
 class UInteractionComponent;
+class UTDAnimInstance;
 
 UCLASS(config=Game)
 class ABaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
-	friend UStatusComponent;
-
+	
 public:
 	ABaseCharacter(const FObjectInitializer& ObjectInitializer);
 
@@ -34,16 +33,12 @@ protected:
 	void MoveRight(float Value);
 
 public:
-	FORCEINLINE UStatusComponent* GetStatusComponent() { return StatusComponent; }
 	FORCEINLINE UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 	FORCEINLINE UWeaponManagerComponent* GetWeaponManagerComponent() { return WeaponManagerComponent; }
 	FORCEINLINE UTDCharacterMovementComponent* GetTDCharacterMovement() { return Cast<UTDCharacterMovementComponent>(GetCharacterMovement()); }
-	FORCEINLINE UTDAnimInstance* GetTDAnimInstance() { return GetMesh() ? Cast<UTDAnimInstance>(GetMesh()->GetAnimInstance()) : nullptr; }
     FORCEINLINE UInteractionComponent* GetInteractionComponent() { return InteractionComponent; }
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UStatusComponent* StatusComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -55,6 +50,49 @@ protected:
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
+
+#pragma region Health
+public:
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float NewHealth) { Health = NewHealth; OnHealthChanged(NewHealth, true);}
+	FORCEINLINE void IncreaseHealth(float Amount) { Health += Amount; OnHealthChanged(Amount); }
+	FORCEINLINE void DecreaseHealth(float Amount) { Health -= Amount; OnHealthChanged(-Amount); }
+
+protected:
+	virtual void OnHealthChanged(float ChangeAmount, bool bChangeBySet = false);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Health;
+#pragma endregion
+
+#pragma region Damage
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	bool ShouldTakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) const override;
+#pragma endregion
+
+#pragma region Animation
+public:
+	FORCEINLINE UTDAnimInstance* GetTDAnimInstance() { return AnimInstance; }
+
+protected:
+	UPROPERTY()
+	UTDAnimInstance* AnimInstance;
+#pragma endregion
+
+#pragma region Montage
+public:
+	void PlayAttackMontage(float PlayRate = 1.f, FName SectionName = NAME_None);
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UAnimMontage* AttackMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UAnimMontage* DeadMontage;
+#pragma endregion
 	
 #pragma region Aim
 protected:
@@ -76,6 +114,7 @@ protected:
 
 #pragma region Attack
 public:
+	//TODO : Deprecated and Implement on Weapon Manager
 	virtual FString GenerateAttackMontageSectionName();
 
 protected:
@@ -83,16 +122,43 @@ protected:
 	virtual void Input_EndAttack();
 #pragma endregion
 
-#pragma region Death
+#pragma region Dead
 public:
+	virtual bool NeedDead();
+	virtual bool CanDead();
+	
 	void Dead(bool bInstantDead, bool bRagdollMode = true);
 
-protected:
-	void StartDead(bool bInstantDead, bool bRagdollMode = true);
-	void EndDead();
+	FORCEINLINE bool IsDead() const { return bDead; }
+	FORCEINLINE bool IsDying() const { return bDying; }
+	FORCEINLINE bool IsDyingorDead() const { return bDying || bDead; }
 
+protected:
+	virtual void StartDead(bool bInstantDead, bool bRagdollMode = true);
+	virtual void EndDead();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bDead;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bDying;
 #pragma endregion
-	
+
+#pragma region Ragdoll
+public:
+	void RagdollMode(bool bActiveRagdoll) { bActiveRagdoll ? StartRagdollMode() : EndRagdollMode(); }
+
+	FORCEINLINE bool IsRagdollMode() const { return bIsRagdollMode; }
+
+protected:
+	virtual void StartRagdollMode();
+	virtual void EndRagdollMode();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsRagdollMode;
+#pragma endregion
+
 #pragma region Names
 protected:
     static const FName StatusComponentName;

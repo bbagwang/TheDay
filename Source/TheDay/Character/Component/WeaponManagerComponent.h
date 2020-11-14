@@ -22,7 +22,9 @@ public:
 
 #pragma region Wepaon
 public:
+	UFUNCTION(BlueprintCallable)
 	void Attack();
+	UFUNCTION(BlueprintCallable)
 	bool CanAttack();
 	
 	//공격중인지
@@ -62,7 +64,9 @@ protected:
 
 #pragma region Aim
 public:
+	UFUNCTION(BlueprintCallable)
 	void SetAiming(bool bNewAiming);
+	UFUNCTION(BlueprintCallable)
 	bool CanAiming();
 
 	FORCEINLINE bool IsAiming() const { return bIsAiming; }
@@ -91,5 +95,8 @@ protected:
 	float AimFOV;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AimInterpSpeed;
+#pragma endregion
+
+#pragma region Animation
 #pragma endregion
 };

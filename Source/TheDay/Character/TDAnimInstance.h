@@ -48,13 +48,8 @@ protected:
 #pragma region Idle;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle")
-	UAnimMontage* Montage_Idle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle")
 	float IdleTime;
 	
-	//Idle이 지속될 경우 다른 애니메이션 재생
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle|Breaker")
-	UAnimMontage* Montage_Idle_Breaker;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle|Breaker")
 	bool bUseIdleBreaker;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle|Breaker")
@@ -86,10 +81,8 @@ protected:
 #pragma region Aim
 protected:
 	void CalculateAimOffset(float DeltaSeconds);
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
-	UAnimMontage* Montage_Aim;
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
 	float AimYaw;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
@@ -99,20 +92,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
 	FVector AimPoint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
-	FRotator AimPointRotator;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
 	bool bIsAiming;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
+	bool bIsFullyAiming;
 #pragma endregion
 
-#pragma region IK
+#pragma region Hand IK
 protected:
-	void UpdateWeaponIK(float DeltaSeconds);
+	void UpdateHandIK(float DeltaSeconds);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
 	FTransform LeftHandIKTransform;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
 	float LeftHandIKAlpha;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FTransform RightHandIKTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	float RightHandIKAlpha;
 #pragma endregion
 
 #pragma region Item
@@ -128,13 +125,7 @@ protected:
 #pragma endregion
 
 #pragma region Attack
-public:
-	float GetAttackMontageSequenceTime(FName SectionName = TEXT("Default"));
-
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
-	UAnimMontage* Montage_Attack;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	bool bIsAttacking;
 #pragma endregion
@@ -145,23 +136,5 @@ protected:
 	bool bIsDying;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dead")
 	bool bIsDead;
-#pragma endregion
-
-#pragma region Reload
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload")
-	UAnimMontage* Montage_Reload;
-#pragma endregion
-
-#pragma region Equip
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equip")
-	UAnimMontage* Montage_Equip;
-#pragma endregion
-
-#pragma region UnEquip
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UnEquip")
-	UAnimMontage* Montage_UnEquip;
 #pragma endregion
 };

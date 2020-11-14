@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"CinematicCamera",
 				"Engine",
-				"UMG"
+				"UMG",
+				"AIModule"
 			]
 		}
 	],

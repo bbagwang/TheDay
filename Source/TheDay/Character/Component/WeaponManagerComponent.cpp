@@ -9,7 +9,6 @@
 #include "Common/CommonDefinition.h"
 #include "DrawDebugHelpers.h"
 #include "../PlayerCharacter.h"
-#include "StatusComponent.h"
 
 UWeaponManagerComponent::UWeaponManagerComponent()
 {
@@ -52,6 +51,11 @@ void UWeaponManagerComponent::Attack()
 	if (!CanAttack())
 		return;
 
+	if(!EquippedWeapon->CanAttack())
+		return;
+
+	float AttackAnimSpeedFromWeapon = EquippedWeapon->GetAttackAnimationSpeed();
+	OwnerCharacter->PlayAttackMontage(AttackAnimSpeedFromWeapon);
 	EquippedWeapon->Attack();
 }
 
@@ -94,9 +98,7 @@ bool UWeaponManagerComponent::CanAiming()
 {
 	if (!OwnerCharacter)
 		return false;
-	if (!OwnerCharacter->GetStatusComponent())
-		return false;
-	if (OwnerCharacter->GetStatusComponent()->IsDying() || OwnerCharacter->GetStatusComponent()->IsDead())
+	if (OwnerCharacter->IsDying())
 		return false;
 	if (!EquippedWeapon->CanAiming())
 		return false;

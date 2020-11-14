@@ -23,6 +23,7 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CalculateAttackAnimationSpeed();
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -64,7 +65,6 @@ void AWeapon::CalculateAttackAnimationSpeed()
 void AWeapon::StartAttack()
 {
 	bAttacking = true;
-	CalculateAttackAnimationSpeed();
 }
 
 void AWeapon::EndAttack()
