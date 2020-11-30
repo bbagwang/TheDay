@@ -12,7 +12,7 @@ class THEDAY_API ATDAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	ATDAIController();
+	ATDAIController(const FObjectInitializer& ObjectInitializer);
 	
 protected:
 	virtual void PostInitializeComponents() override;

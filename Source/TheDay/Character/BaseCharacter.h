@@ -79,7 +79,7 @@ public:
 	FORCEINLINE UTDAnimInstance* GetTDAnimInstance() { return AnimInstance; }
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UTDAnimInstance* AnimInstance;
 #pragma endregion
 

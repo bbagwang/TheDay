@@ -144,6 +144,10 @@ float ABaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& Damage
 
 	DecreaseHealth(Damage);
 
+	if (CanDead())
+	{
+		Dead(false,true);
+	}
 	return Damage;
 }
 
@@ -279,17 +283,18 @@ void ABaseCharacter::StartDead(bool bInstantDead, bool bRagdollMode /*= true*/)
 void ABaseCharacter::EndDead()
 {
 	bDead = true;
+	StartRagdollMode();
 }
 #pragma endregion
 
 #pragma region Ragdoll
 void ABaseCharacter::StartRagdollMode()
 {
-
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
 }
 
 void ABaseCharacter::EndRagdollMode()
 {
-
+	GetMesh()->SetAllBodiesSimulatePhysics(false);
 }
 #pragma endregion
