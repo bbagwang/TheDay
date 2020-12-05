@@ -16,7 +16,7 @@ public class TheDay : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[]
         { "Core", "CoreUObject", "Engine", "InputCore",
         "GameplayAbilities","GameplayTags","GameplayTasks",
-        "NavigationSystem","AIModule","Slate", "SlateCore",
-        "UMG", "AkAudio" });
+        "NavigationSystem","AIModule", "Slate", "SlateCore",
+        "UMG"});
     }
 }
