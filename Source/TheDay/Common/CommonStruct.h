@@ -7,14 +7,9 @@
 
 #pragma region Interaction
 USTRUCT(BlueprintType)
-struct FInteractionWidgetBaseData
+struct FStructTemp
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanInteract;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText LocalizedDisplayText;
 };
 
 #pragma endregion

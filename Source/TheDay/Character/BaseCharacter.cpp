@@ -12,7 +12,6 @@
 #include "Component/InventoryComponent.h"
 #include "Component/WeaponManagerComponent.h"
 #include "Component/TDCharacterMovementComponent.h"
-#include "Item/Component/InteractionComponent.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "System/TDPlayerController.h"
@@ -22,7 +21,6 @@
 const FName ABaseCharacter::StatusComponentName = TEXT("Status Component");
 const FName ABaseCharacter::InventoryComponentName = TEXT("Inventory Component");
 const FName ABaseCharacter::WeaponManagerComponentName = TEXT("Weapon Manager Component");
-const FName ABaseCharacter::InteractionComponentName = TEXT("Interaction Component");
 
 ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDCharacterMovementComponent>(CharacterMovementComponentName))
@@ -53,9 +51,6 @@ ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
     ensure(InventoryComponent);
     WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(WeaponManagerComponentName);
     ensure(WeaponManagerComponent);
-    InteractionComponent = CreateOptionalDefaultSubobject<UInteractionComponent>(InteractionComponentName);
-    if (InteractionComponent)
-        InteractionComponent->SetupAttachment(GetMesh());
 }
 
 void ABaseCharacter::BeginPlay()

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interface/InteractionInterface.h"
 #include "Item.generated.h"
 
 class ABaseCharacter;
@@ -12,7 +11,7 @@ class USkeletalMeshComponent;
 class UInteractionComponent;
 
 UCLASS()
-class THEDAY_API AItem : public AActor, public IInteractionInterface
+class THEDAY_API AItem : public AActor
 {
 	GENERATED_BODY()
 
@@ -60,28 +59,6 @@ protected:
 public:
 	virtual void OnTaken();
 	virtual bool CanTake();
-#pragma endregion
-
-#pragma region Interaction
-public:
-	//Interaction Interface ~
-	virtual void Interact_Implementation() override;
-	virtual void OnCompleteInteraction_Implementation() override;
-	virtual void OnCancelInteraction_Implementation() override;
-	virtual bool CanInteract_Implementation() override;
-	virtual FInteractionWidgetBaseData GetInteractionWidgetData_Implementation() override;
-	//~ Interaction Interface
-
-	UFUNCTION()
-	virtual void OnInteractionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	virtual void OnInteractionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	FORCEINLINE UInteractionComponent* GetInteractionComponent() { return InteractionComponent; }
-
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UInteractionComponent* InteractionComponent;
 #pragma endregion
 
 #pragma region Names

@@ -39,7 +39,6 @@ public:
 	FORCEINLINE UWeaponManagerComponent* GetWeaponManagerComponent() { return WeaponManagerComponent; }
 	FORCEINLINE UTDCharacterMovementComponent* GetTDCharacterMovement() { return Cast<UTDCharacterMovementComponent>(GetCharacterMovement()); }
 	FORCEINLINE UTDAnimInstance* GetTDAnimInstance() { return GetMesh() ? Cast<UTDAnimInstance>(GetMesh()->GetAnimInstance()) : nullptr; }
-    FORCEINLINE UInteractionComponent* GetInteractionComponent() { return InteractionComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -48,8 +47,6 @@ protected:
 	class UInventoryComponent* InventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UWeaponManagerComponent* WeaponManagerComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UInteractionComponent* InteractionComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseTurnRate;
@@ -98,6 +95,5 @@ protected:
     static const FName StatusComponentName;
     static const FName InventoryComponentName;
     static const FName WeaponManagerComponentName;
-    static const FName InteractionComponentName;
 #pragma endregion
 };
