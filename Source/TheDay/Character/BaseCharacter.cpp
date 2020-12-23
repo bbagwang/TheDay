@@ -8,19 +8,19 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Component/StatusComponent.h"
 #include "Component/InventoryComponent.h"
 #include "Component/WeaponManagerComponent.h"
 #include "Component/TDCharacterMovementComponent.h"
-#include "Item/Component/InteractionComponent.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "System/TDPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Common/CommonNameSpace.h"
 
+const FName ABaseCharacter::StatusComponentName = TEXT("Status Component");
 const FName ABaseCharacter::InventoryComponentName = TEXT("Inventory Component");
 const FName ABaseCharacter::WeaponManagerComponentName = TEXT("Weapon Manager Component");
-const FName ABaseCharacter::InteractionComponentName = TEXT("Interaction Component");
 
 ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDCharacterMovementComponent>(CharacterMovementComponentName))
@@ -38,28 +38,24 @@ ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
-
+	 
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanFly = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanJump = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanSwim = true;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanWalk = true;
 
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(InventoryComponentName);
-	ensure(InventoryComponent);
-	WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(WeaponManagerComponentName);
-	ensure(WeaponManagerComponent);
-	InteractionComponent = CreateOptionalDefaultSubobject<UInteractionComponent>(InteractionComponentName);
-	if (InteractionComponent)
-		InteractionComponent->SetupAttachment(GetMesh());
+    StatusComponent = CreateDefaultSubobject<UStatusComponent>(StatusComponentName);
+    ensure(StatusComponent);
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(InventoryComponentName);
+    ensure(InventoryComponent);
+    WeaponManagerComponent = CreateDefaultSubobject<UWeaponManagerComponent>(WeaponManagerComponentName);
+    ensure(WeaponManagerComponent);
 }
 
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AnimInstance = Cast<UTDAnimInstance>(GetMesh()->GetAnimInstance());
-	ensure(AnimInstance);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -84,7 +80,7 @@ void ABaseCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction(InputKeyName::AIM, IE_Released, this, &ABaseCharacter::Input_EndAiming);
 	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Pressed, this, &ABaseCharacter::Input_StartAttack);
 	PlayerInputComponent->BindAction(InputKeyName::ATTACK, IE_Released, this, &ABaseCharacter::Input_EndAttack);
-
+	
 
 	//Control
 	PlayerInputComponent->BindAxis(InputKeyName::MOVE_FORWARD, this, &ABaseCharacter::MoveForward);
@@ -130,40 +126,6 @@ void ABaseCharacter::MoveRight(float Value)
 	}
 }
 
-#pragma region Health
-void ABaseCharacter::OnHealthChanged(float ChangeAmount, bool bChangeBySet /*= false*/)
-{
-
-}
-#pragma endregion
-
-#pragma region Damage
-float ABaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	DecreaseHealth(Damage);
-
-	if (CanDead())
-	{
-		Dead(false,true);
-	}
-	return Damage;
-}
-
-bool ABaseCharacter::ShouldTakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) const
-{
-	return Super::ShouldTakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-}
-
-void ABaseCharacter::PlayAttackMontage(float PlayRate /*= 1.f*/, FName SectionName /*= NAME_None*/)
-{
-	PlayAnimMontage(AttackMontage, PlayRate, SectionName);
-}
-
-#pragma endregion
-
 void ABaseCharacter::Input_StartAiming()
 {
 	if (!GetWeaponManagerComponent())
@@ -207,7 +169,7 @@ void ABaseCharacter::Input_EndSprint()
 FString ABaseCharacter::GenerateAttackMontageSectionName()
 {
 	FString SectionName;
-	if (GetTDCharacterMovement() && GetTDCharacterMovement()->IsCrouching())
+	if (GetTDCharacterMovement()&&GetTDCharacterMovement()->IsCrouching())
 		SectionName.Append(TEXT("Crouch"));
 	else
 		SectionName.Append(TEXT("Stand"));
@@ -220,81 +182,49 @@ FString ABaseCharacter::GenerateAttackMontageSectionName()
 #pragma region Attack
 void ABaseCharacter::Input_StartAttack()
 {
-	if (!WeaponManagerComponent)
-		return;
+    if (!WeaponManagerComponent)
+        return;
 
-	WeaponManagerComponent->bAttackKeyPressed = true;
-	WeaponManagerComponent->Attack();
+    WeaponManagerComponent->bAttackKeyPressed = true;
+    WeaponManagerComponent->Attack();
 }
 
 void ABaseCharacter::Input_EndAttack()
 {
-	if (!WeaponManagerComponent)
-		return;
+    if (!WeaponManagerComponent)
+        return;
 
-	WeaponManagerComponent->bAttackKeyPressed = false;
+    WeaponManagerComponent->bAttackKeyPressed = false;
 }
 #pragma endregion
 
 #pragma region Dead
-bool ABaseCharacter::NeedDead()
-{
-	if (Health <= 0)
-		return true;
-
-	return false;
-}
-
-bool ABaseCharacter::CanDead()
-{
-	if (!NeedDead())
-		return false;
-
-	if (bDying || bDead)
-		return false;
-
-	return true;
-}
-
 void ABaseCharacter::Dead(bool bInstantDead, bool bRagdollMode /*= true*/)
 {
-	//Maybe Broadcast Something Later
-	StartDead(bInstantDead, bRagdollMode);
+    StartDead(bInstantDead, bRagdollMode);
 }
 
 void ABaseCharacter::StartDead(bool bInstantDead, bool bRagdollMode /*= true*/)
 {
-	bDying = true;
-
-	//Essential Death Process ~
 	GetTDCharacterMovement()->StopMovementImmediately();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//~ Essential Death Process
-
-	//즉시 사망의 경우 바로 EndDead 호출
-	if (bInstantDead)
+	ATDPlayerController* PC = Cast<ATDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (!PC)
 	{
 		EndDead();
 		return;
 	}
-
+	//Anim Processing
+	if (bInstantDead)
+	{
+		EndDead();
+	}
 }
 
 void ABaseCharacter::EndDead()
 {
-	bDead = true;
-	StartRagdollMode();
-}
-#pragma endregion
+	if (!StatusComponent)
+		return;
 
-#pragma region Ragdoll
-void ABaseCharacter::StartRagdollMode()
-{
-	GetMesh()->SetAllBodiesSimulatePhysics(true);
-}
-
-void ABaseCharacter::EndRagdollMode()
-{
-	GetMesh()->SetAllBodiesSimulatePhysics(false);
 }
 #pragma endregion
