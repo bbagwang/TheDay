@@ -113,9 +113,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Fire|Spread")
 	FVector2D FireSpreadRecovery;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Sockets")
-	FName MuzzleSocketName;
-
 	//¹«ÇÑ ÃÑ¾Ë ¸ðµå
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Cheat")
 	bool bInfiniteAmmoMode;
@@ -159,6 +156,7 @@ protected:
 	void PlayFireMuzzleEffect();
 	void SpawnFireTracerEffect(FVector StartPoint, FVector EndPoint);
 	void SpawnImpactEffect(FVector SpawnLocation, FRotator SpawnRotation);
+	void SpawnEjectShellEffect();
 
 protected:
 	//ÃÑ±¸ ÀÌÆåÆ® ÄÄÆ÷³ÍÆ®
@@ -173,9 +171,28 @@ protected:
 	//ÃÑ¾Ë Æ®·¹ÀÌ½º ÀÌÆåÆ®
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Effects")
 	class UParticleSystem* FireTracerEffect;
+	//ÃÑ¾Ë ÅºÇÇ ÀÌÆåÆ®
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Effects")
+	class UParticleSystem* EjectShellEffect;
 	//ÃÑ¾Ë Æ®·¹ÀÌ½º ÀÌÆåÆ® °ü·Ã ÆÄ¶ó¸ÞÅÍ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Effects")
 	FName TracerParameterName;
+#pragma endregion
+
+#pragma region Montage
+public:
+	void PlayFireMontage();
+	void StopFireMontage();
+
+	void PlayReloadMontage();
+
+protected:
+	//»ç°Ý ¸ùÅ¸ÁÖ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Montage")
+	class UAnimMontage* FireMontage;
+	//ÀçÀåÀü ¸ùÅ¸ÁÖ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Montage")
+	class UAnimMontage* ReloadMontage;
 #pragma endregion
 
 #pragma region Inventory
@@ -186,6 +203,11 @@ public:
 
 #pragma region Names
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Sockets")
+	FName MuzzleSocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Weapon|Sockets")
+	FName EjectShellSocketName;
+
 	static const FName MuzzleEffectComponentName;
 	static const FName MuzzleSoundComponentName;
 
